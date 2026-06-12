@@ -161,7 +161,7 @@ export default function App() {
           <p className="text-xs font-semibold tracking-widest uppercase mb-10 text-center" style={{ color: '#C09018', letterSpacing: '0.22em' }}>
             Os Agentes
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
             {AGENTS.map((a) => (
               <div
                 key={a.name}
