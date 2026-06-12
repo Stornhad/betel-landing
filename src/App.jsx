@@ -38,11 +38,10 @@ const PILLARS = [
 ];
 
 const AGENTS = [
-  { name: 'JOSÉ',          role: 'Provisão, Legado & Visão de Vida',                      initial: 'J' },
-  { name: 'DANIEL',        role: 'Trading Quantitativo & Discernimento de Mercado',        initial: 'D' },
-  { name: 'BEZALEL',       role: 'Construção Técnica & Desenvolvimento',                   initial: 'B' },
-  { name: 'CALEB',         role: 'Análise, Discernimento & Mentoria',                      initial: 'C' },
-  { name: 'MELQUISEDEQUE', role: 'Governança Patrimonial & Sabedoria Estratégica',         initial: 'M' },
+  { name: 'JOSÉ',    role: 'Provisão, Legado & Visão de Vida',                   initial: 'J' },
+  { name: 'DANIEL',  role: 'Trading Quantitativo & Discernimento de Mercado',    initial: 'D' },
+  { name: 'BEZALEL', role: 'Construção Técnica & Desenvolvimento',               initial: 'B' },
+  { name: 'CALEB',   role: 'Análise, Discernimento & Mentoria',                  initial: 'C' },
 ];
 
 const STACK = [
