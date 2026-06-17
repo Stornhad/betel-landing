@@ -72,9 +72,13 @@ export default function App() {
           >
             BETEL
           </span>
-          <span className="text-xs font-medium tracking-widest uppercase" style={{ color: '#8C8070' }}>
-            Ecossistema Privado
-          </span>
+          <a
+            href="https://betel-patrimonio.vercel.app"
+            className="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-lg bg-gold-500 hover:bg-gold-400 transition-colors"
+            style={{ color: '#1C1A13', letterSpacing: '0.1em' }}
+          >
+            Acessar
+          </a>
         </div>
       </header>
 
@@ -102,8 +106,15 @@ export default function App() {
           >
             Plataforma de agentes de IA para gestão patrimonial e operacional inteligente
           </p>
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 flex flex-col items-center gap-6">
             <div className="w-16 h-px" style={{ background: '#C09018', opacity: 0.5 }} />
+            <a
+              href="https://betel-patrimonio.vercel.app"
+              className="inline-block px-8 py-3.5 rounded-xl bg-gold-500 hover:bg-gold-400 transition-colors text-sm font-semibold tracking-wider uppercase"
+              style={{ color: '#1C1A13', letterSpacing: '0.12em' }}
+            >
+              Acessar Patrimônio
+            </a>
           </div>
         </div>
       </section>
