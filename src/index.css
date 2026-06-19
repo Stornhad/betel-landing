@@ -9,8 +9,17 @@
   --color-gold-500: #C09018;
   --color-gold-700: #74560E;
 
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  --text-display-xl: 6rem;
+  --text-display-lg: 4rem;
+  --text-display-md: 2.5rem;
+  --text-heading:    1.5rem;
+  --text-body-lg:    1.125rem;
+  --text-body:       1rem;
+  --text-label:      0.688rem;
+  --text-caption:    0.563rem;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -21,7 +30,7 @@ body {
   margin: 0;
   background-color: #F7F4EE;
   color: #1C1A13;
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 

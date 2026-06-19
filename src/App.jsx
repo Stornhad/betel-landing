@@ -138,7 +138,7 @@ export default function App() {
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <span
             className="text-xl font-semibold tracking-widest uppercase"
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", color: '#C09018', letterSpacing: '0.2em' }}
+            style={{ fontFamily: 'var(--font-display)', color: '#C09018', letterSpacing: '0.2em' }}
           >
             BETEL
           </span>
@@ -168,7 +168,7 @@ export default function App() {
           <h1
             className="mb-6 leading-tight"
             style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontFamily: 'var(--font-display)',
               fontSize: 'clamp(3rem, 8vw, 5.5rem)',
               fontWeight: 600,
               color: '#1C1A13',
@@ -252,7 +252,7 @@ export default function App() {
                   <h3
                     className="text-xl mb-2"
                     style={{
-                      fontFamily: "'Cormorant Garamond', Georgia, serif",
+                      fontFamily: 'var(--font-display)',
                       fontWeight: isPrimary ? 600 : 400,
                       color: '#1C1A13',
                     }}
@@ -293,7 +293,7 @@ export default function App() {
                   style={{
                     background: '#E8D9A0',
                     color: '#8B6914',
-                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    fontFamily: 'var(--font-display)',
                     fontWeight: 500,
                     fontSize: '1.1rem',
                   }}
