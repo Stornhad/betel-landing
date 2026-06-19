@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 const PILLARS = [
   {
     name: 'Casa',
@@ -35,35 +37,103 @@ const PILLARS = [
       </svg>
     ),
   },
-];
+]
 
 const AGENTS = [
-  { name: 'JOSÉ',    role: 'Provisão, Legado & Visão de Vida',                   initial: 'J' },
-  { name: 'DANIEL',  role: 'Trading Quantitativo & Discernimento de Mercado',    initial: 'D' },
-  { name: 'BEZALEL', role: 'Construção Técnica & Desenvolvimento',               initial: 'B' },
-  { name: 'CALEB',   role: 'Análise, Discernimento & Mentoria',                  initial: 'C' },
-];
+  { name: 'JOSÉ',    role: 'Provisão, Legado & Visão de Vida',                initial: 'J' },
+  { name: 'DANIEL',  role: 'Trading Quantitativo & Discernimento de Mercado', initial: 'D' },
+  { name: 'BEZALEL', role: 'Construção Técnica & Desenvolvimento',            initial: 'B' },
+  { name: 'CALEB',   role: 'Análise, Discernimento & Mentoria',               initial: 'C' },
+]
 
 const STACK = [
   { name: 'React',        desc: 'Frontend' },
   { name: 'Supabase',     desc: 'Backend & Auth' },
   { name: 'Vercel',       desc: 'Deploy & Edge' },
   { name: 'AWS Bedrock',  desc: 'IA & LLMs' },
-];
+]
 
-const Divider = () => (
-  <div className="flex items-center gap-4 my-2">
-    <div className="flex-1 h-px bg-amber-200" />
-    <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-    <div className="flex-1 h-px bg-amber-200" />
+// Separador dourado entre seções
+const SectionDivider = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
+    <div style={{ width: 48, height: 1, background: '#B8860B', opacity: 0.6 }} />
   </div>
-);
+)
 
 export default function App() {
-  return (
-    <div className="min-h-screen" style={{ background: '#FAFAF6', color: '#1C1A13' }}>
 
-      {/* ── TOPBAR ─────────────────────────────────────────────────── */}
+  useEffect(() => {
+    const scenes = Array.from(document.querySelectorAll('[data-scene]'))
+
+    // Classificação síncrona sem transição: seções fora do viewport ficam invisíveis
+    // imediatamente (sem flash, pois são off-screen)
+    scenes.forEach(el => {
+      const rect = el.getBoundingClientRect()
+      if (rect.top >= window.innerHeight) {
+        el.classList.add('scene-below')
+      } else if (rect.bottom <= 0) {
+        el.classList.add('scene-exit')
+      }
+      // Seções no viewport ficam sem classe → totalmente visíveis (comportamento padrão)
+    })
+
+    let io = null
+
+    // Habilitar transições após primeiro frame (evita transições no classify acima)
+    const rafId = requestAnimationFrame(() => {
+      scenes.forEach(el => el.classList.add('scene-ready'))
+
+      io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(entry => {
+            const el = entry.target
+            el.classList.remove('scene-active', 'scene-below', 'scene-exit')
+
+            if (entry.isIntersecting) {
+              el.classList.add('scene-active')
+            } else if (entry.boundingClientRect.top < 0) {
+              // Seção saiu pelo topo → foi scrollada para cima
+              el.classList.add('scene-exit')
+            } else {
+              // Seção ainda não entrou (abaixo do viewport)
+              el.classList.add('scene-below')
+            }
+          })
+        },
+        { threshold: 0.08 }
+      )
+
+      scenes.forEach(el => io.observe(el))
+    })
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      io?.disconnect()
+    }
+  }, [])
+
+  return (
+    <div
+      className="min-h-screen"
+      style={{ background: '#F7F4EE', color: '#1C1A13', overflowX: 'hidden' }}
+    >
+
+      {/* Noise overlay — SVG feTurbulence inline, 0 bytes de asset externo */}
+      <svg
+        aria-hidden="true"
+        style={{
+          position: 'fixed', top: 0, left: 0,
+          width: '100vw', height: '100vh',
+          opacity: 0.03, pointerEvents: 'none', zIndex: 9999,
+        }}
+      >
+        <filter id="betel-noise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#betel-noise)" />
+      </svg>
+
+      {/* ── TOPBAR — estático, sem scene effect ────────────────── */}
       <header className="border-b" style={{ borderColor: '#EDE8DC' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <span
@@ -82,10 +152,17 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── HERO ───────────────────────────────────────────────────── */}
-      <section className="pt-24 pb-20 px-6 text-center">
+      {/* ── HERO ───────────────────────────────────────────────── */}
+      <section
+        data-scene
+        className="pt-24 pb-20 px-6 text-center"
+        style={{ background: 'linear-gradient(to bottom, #F7F4EE, #EFEAD9)' }}
+      >
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-6" style={{ color: '#C09018', letterSpacing: '0.22em' }}>
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-6"
+            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+          >
             Ecossistema de Agentes de IA
           </p>
           <h1
@@ -119,10 +196,18 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── O QUE É ────────────────────────────────────────────────── */}
-      <section className="py-20 px-6" style={{ background: '#FFFFFF', borderTop: '1px solid #EDE8DC', borderBottom: '1px solid #EDE8DC' }}>
+      {/* ── O QUE É ────────────────────────────────────────────── */}
+      <section
+        data-scene
+        className="py-20 px-6"
+        style={{ background: '#FFFFFF', borderTop: '1px solid #EDE8DC', borderBottom: '1px solid #EDE8DC' }}
+      >
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-10 text-center" style={{ color: '#C09018', letterSpacing: '0.22em' }}>
+          <SectionDivider />
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
+            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+          >
             O que é
           </p>
           <div className="space-y-5 text-base leading-relaxed" style={{ color: '#5C5545' }}>
@@ -139,37 +224,61 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── PILARES ────────────────────────────────────────────────── */}
-      <section className="py-20 px-6">
+      {/* ── OS QUATRO PILARES ──────────────────────────────────── */}
+      <section data-scene className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-10 text-center" style={{ color: '#C09018', letterSpacing: '0.22em' }}>
+          <SectionDivider />
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
+            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+          >
             Os Quatro Pilares
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {PILLARS.map((p) => (
-              <div
-                key={p.name}
-                className="rounded-xl p-6"
-                style={{ background: '#FFFFFF', border: '1px solid #EDE8DC', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-              >
-                <div className="mb-4" style={{ color: '#C09018' }}>{p.icon}</div>
-                <h3
-                  className="text-xl mb-2"
-                  style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 600, color: '#1C1A13' }}
+            {PILLARS.map((p) => {
+              const isPrimary = p.name === 'Casa' || p.name === 'Altar'
+              return (
+                <div
+                  key={p.name}
+                  className="rounded-xl p-6"
+                  style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #EDE8DC',
+                    borderLeft: isPrimary ? '2px solid #B8860B' : '1px solid #EDE8DC',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                  }}
                 >
-                  {p.name}
-                </h3>
-                <p className="text-sm leading-relaxed" style={{ color: '#8C8070' }}>{p.desc}</p>
-              </div>
-            ))}
+                  <div className="mb-4" style={{ color: '#C09018' }}>{p.icon}</div>
+                  <h3
+                    className="text-xl mb-2"
+                    style={{
+                      fontFamily: "'Cormorant Garamond', Georgia, serif",
+                      fontWeight: isPrimary ? 600 : 400,
+                      color: '#1C1A13',
+                    }}
+                  >
+                    {p.name}
+                  </h3>
+                  <p className="text-sm leading-relaxed" style={{ color: '#8C8070' }}>{p.desc}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* ── AGENTES ────────────────────────────────────────────────── */}
-      <section className="py-20 px-6" style={{ background: '#FFFFFF', borderTop: '1px solid #EDE8DC', borderBottom: '1px solid #EDE8DC' }}>
+      {/* ── OS AGENTES ─────────────────────────────────────────── */}
+      <section
+        data-scene
+        className="py-20 px-6"
+        style={{ background: '#FFFFFF', borderTop: '1px solid #EDE8DC', borderBottom: '1px solid #EDE8DC' }}
+      >
         <div className="max-w-5xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-10 text-center" style={{ color: '#C09018', letterSpacing: '0.22em' }}>
+          <SectionDivider />
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
+            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+          >
             Os Agentes
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
@@ -180,8 +289,14 @@ export default function App() {
                 style={{ background: '#FAFAF6', border: '1px solid #EDE8DC' }}
               >
                 <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-semibold"
-                  style={{ background: '#F3E4B0', color: '#74560E', fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '1.1rem' }}
+                  className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: '#E8D9A0',
+                    color: '#8B6914',
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    fontWeight: 500,
+                    fontSize: '1.1rem',
+                  }}
                 >
                   {a.initial}
                 </div>
@@ -200,10 +315,14 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── STACK ──────────────────────────────────────────────────── */}
-      <section className="py-20 px-6">
+      {/* ── STACK TÉCNICA ──────────────────────────────────────── */}
+      <section data-scene className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-10 text-center" style={{ color: '#C09018', letterSpacing: '0.22em' }}>
+          <SectionDivider />
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
+            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+          >
             Stack Técnica
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -211,7 +330,11 @@ export default function App() {
               <div
                 key={s.name}
                 className="rounded-lg px-6 py-4 text-center min-w-[130px]"
-                style={{ background: '#FFFFFF', border: '1px solid #EDE8DC', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #EDE8DC',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                }}
               >
                 <div className="text-sm font-semibold" style={{ color: '#1C1A13' }}>{s.name}</div>
                 <div className="text-xs mt-1" style={{ color: '#8C8070' }}>{s.desc}</div>
@@ -221,7 +344,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────── */}
+      {/* ── FOOTER — estático, sem scene effect ────────────────── */}
       <footer
         className="py-10 px-6 text-center"
         style={{ borderTop: '1px solid #EDE8DC', background: '#F5F0E8' }}
