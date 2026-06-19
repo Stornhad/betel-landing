@@ -20,6 +20,21 @@
   --text-body:       1rem;
   --text-label:      0.688rem;
   --text-caption:    0.563rem;
+
+  /* ── Tokens de cor semânticos ───────────────────────────── */
+  --gold-primary: #B8860B;
+  --gold-warm:    #C9A028;
+  --gold-light:   #E8D9A0;
+  --gold-dark:    #8B6914;
+  --gold-earth:   #6B5A2E;
+
+  --cream-base:   #F7F4EE;
+  --cream-warm:   #EFEAD9;
+
+  --card-border:  #E8E4DC;
+
+  --text-primary:   #1C1C1C;
+  --text-secondary: #6B6B6B;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -28,13 +43,13 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background-color: #F7F4EE;
-  color: #1C1A13;
+  background-color: var(--cream-base);
+  color: var(--text-primary);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background-color: #E8C97A;
-  color: #1C1A13;
+  background-color: var(--color-gold-300);
+  color: var(--text-primary);
 }

@@ -59,7 +59,7 @@ const STACK = [
 
 const SectionDivider = () => (
   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-    <div style={{ width: 48, height: 1, background: '#B8860B', opacity: 0.6 }} />
+    <div style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.6 }} />
   </div>
 )
 
@@ -114,11 +114,9 @@ export default function App() {
   return (
     <div
       className="min-h-screen"
-      style={{ background: '#F7F4EE', color: '#1C1A13', overflowX: 'hidden' }}
+      style={{ background: 'var(--cream-base)', color: 'var(--text-primary)', overflowX: 'hidden' }}
     >
 
-      {/* Noise overlay — SVG feTurbulence inline; transformPerspective em gsap por-elemento
-          para não quebrar position:fixed do overlay e das seções pinadas */}
       <svg
         aria-hidden="true"
         style={{
@@ -134,18 +132,18 @@ export default function App() {
       </svg>
 
       {/* ── TOPBAR ─────────────────────────────────────────────── */}
-      <header className="border-b" style={{ borderColor: '#EDE8DC' }}>
+      <header className="border-b" style={{ borderColor: 'var(--card-border)' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <span
             className="text-xl font-semibold tracking-widest uppercase"
-            style={{ fontFamily: 'var(--font-display)', color: '#C09018', letterSpacing: '0.2em' }}
+            style={{ fontFamily: 'var(--font-display)', color: 'var(--gold-warm)', letterSpacing: '0.2em' }}
           >
             BETEL
           </span>
           <a
             href="https://betel-patrimonio.vercel.app"
             className="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-lg bg-gold-500 hover:bg-gold-400 transition-colors"
-            style={{ color: '#1C1A13', letterSpacing: '0.1em' }}
+            style={{ color: 'var(--text-primary)', letterSpacing: '0.1em' }}
           >
             Acessar
           </a>
@@ -156,12 +154,12 @@ export default function App() {
       <section
         data-scene
         className="pt-24 pb-20 px-6 text-center"
-        style={{ background: 'linear-gradient(to bottom, #F7F4EE, #EFEAD9)' }}
+        style={{ background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}
       >
         <div className="max-w-3xl mx-auto">
           <p
             className="text-xs font-semibold tracking-widest uppercase mb-6"
-            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
           >
             Ecossistema de Agentes de IA
           </p>
@@ -171,7 +169,7 @@ export default function App() {
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(3rem, 8vw, 5.5rem)',
               fontWeight: 600,
-              color: '#1C1A13',
+              color: 'var(--text-primary)',
               letterSpacing: '-0.02em',
             }}
           >
@@ -179,16 +177,16 @@ export default function App() {
           </h1>
           <p
             className="text-lg leading-relaxed max-w-2xl mx-auto"
-            style={{ color: '#5C5545', fontWeight: 400 }}
+            style={{ color: 'var(--text-secondary)', fontWeight: 400 }}
           >
             Plataforma de agentes de IA para gestão patrimonial e operacional inteligente
           </p>
           <div className="mt-10 flex flex-col items-center gap-6">
-            <div className="w-16 h-px" style={{ background: '#C09018', opacity: 0.5 }} />
+            <div className="w-16 h-px" style={{ background: 'var(--gold-warm)', opacity: 0.5 }} />
             <a
               href="https://betel-patrimonio.vercel.app"
               className="inline-block px-8 py-3.5 rounded-xl bg-gold-500 hover:bg-gold-400 transition-colors text-sm font-semibold tracking-wider uppercase"
-              style={{ color: '#1C1A13', letterSpacing: '0.12em' }}
+              style={{ color: 'var(--text-primary)', letterSpacing: '0.12em' }}
             >
               Acessar Patrimônio
             </a>
@@ -200,17 +198,17 @@ export default function App() {
       <section
         data-scene
         className="py-20 px-6"
-        style={{ background: '#FFFFFF', borderTop: '1px solid #EDE8DC', borderBottom: '1px solid #EDE8DC' }}
+        style={{ background: '#FFFFFF', borderTop: '1px solid var(--card-border)', borderBottom: '1px solid var(--card-border)' }}
       >
         <div className="max-w-2xl mx-auto">
           <SectionDivider />
           <p
             className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
           >
             O que é
           </p>
-          <div className="space-y-5 text-base leading-relaxed" style={{ color: '#5C5545' }}>
+          <div className="space-y-5 text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
             <p>
               BETEL é um ecossistema privado de agentes de inteligência artificial desenvolvido para apoiar decisões patrimoniais, operacionais e estratégicas com profundidade e rastreabilidade.
             </p>
@@ -230,7 +228,7 @@ export default function App() {
           <SectionDivider />
           <p
             className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
           >
             Os Quatro Pilares
           </p>
@@ -243,23 +241,23 @@ export default function App() {
                   className="rounded-xl p-6"
                   style={{
                     background: '#FFFFFF',
-                    border: '1px solid #EDE8DC',
-                    borderLeft: isPrimary ? '2px solid #B8860B' : '1px solid #EDE8DC',
+                    border: '1px solid var(--card-border)',
+                    borderLeft: isPrimary ? '2px solid var(--gold-primary)' : '1px solid var(--card-border)',
                     boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                   }}
                 >
-                  <div className="mb-4" style={{ color: '#C09018' }}>{p.icon}</div>
+                  <div className="mb-4" style={{ color: 'var(--gold-warm)' }}>{p.icon}</div>
                   <h3
                     className="text-xl mb-2"
                     style={{
                       fontFamily: 'var(--font-display)',
                       fontWeight: isPrimary ? 600 : 400,
-                      color: '#1C1A13',
+                      color: 'var(--text-primary)',
                     }}
                   >
                     {p.name}
                   </h3>
-                  <p className="text-sm leading-relaxed" style={{ color: '#8C8070' }}>{p.desc}</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{p.desc}</p>
                 </div>
               )
             })}
@@ -271,13 +269,13 @@ export default function App() {
       <section
         data-scene
         className="py-20 px-6"
-        style={{ background: '#FFFFFF', borderTop: '1px solid #EDE8DC', borderBottom: '1px solid #EDE8DC' }}
+        style={{ background: '#FFFFFF', borderTop: '1px solid var(--card-border)', borderBottom: '1px solid var(--card-border)' }}
       >
         <div className="max-w-5xl mx-auto">
           <SectionDivider />
           <p
             className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
           >
             Os Agentes
           </p>
@@ -286,13 +284,13 @@ export default function App() {
               <div
                 key={a.name}
                 className="flex items-center gap-4 rounded-xl p-5"
-                style={{ background: '#FAFAF6', border: '1px solid #EDE8DC' }}
+                style={{ background: 'var(--cream-base)', border: '1px solid var(--card-border)' }}
               >
                 <div
                   className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{
-                    background: '#E8D9A0',
-                    color: '#8B6914',
+                    background: 'var(--gold-light)',
+                    color: 'var(--gold-dark)',
                     fontFamily: 'var(--font-display)',
                     fontWeight: 500,
                     fontSize: '1.1rem',
@@ -303,11 +301,11 @@ export default function App() {
                 <div>
                   <div
                     className="text-sm font-semibold tracking-wider"
-                    style={{ color: '#1C1A13', letterSpacing: '0.08em' }}
+                    style={{ color: 'var(--text-primary)', letterSpacing: '0.08em' }}
                   >
                     {a.name}
                   </div>
-                  <div className="text-xs mt-0.5 leading-relaxed" style={{ color: '#8C8070' }}>{a.role}</div>
+                  <div className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{a.role}</div>
                 </div>
               </div>
             ))}
@@ -321,7 +319,7 @@ export default function App() {
           <SectionDivider />
           <p
             className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: '#C09018', letterSpacing: '0.22em' }}
+            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
           >
             Stack Técnica
           </p>
@@ -332,12 +330,12 @@ export default function App() {
                 className="rounded-lg px-6 py-4 text-center min-w-[130px]"
                 style={{
                   background: '#FFFFFF',
-                  border: '1px solid #EDE8DC',
+                  border: '1px solid var(--card-border)',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                 }}
               >
-                <div className="text-sm font-semibold" style={{ color: '#1C1A13' }}>{s.name}</div>
-                <div className="text-xs mt-1" style={{ color: '#8C8070' }}>{s.desc}</div>
+                <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{s.name}</div>
+                <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{s.desc}</div>
               </div>
             ))}
           </div>
@@ -347,12 +345,12 @@ export default function App() {
       {/* ── FOOTER ─────────────────────────────────────────────── */}
       <footer
         className="py-10 px-6 text-center"
-        style={{ borderTop: '1px solid #EDE8DC', background: '#F5F0E8' }}
+        style={{ borderTop: '1px solid var(--card-border)', background: 'var(--cream-warm)' }}
       >
-        <p className="text-xs tracking-widest uppercase" style={{ color: '#8C8070', letterSpacing: '0.18em' }}>
+        <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-secondary)', letterSpacing: '0.18em' }}>
           Sistema privado — acesso restrito
         </p>
-        <p className="text-xs mt-2" style={{ color: '#B0A898' }}>
+        <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>
           © {new Date().getFullYear()} Ecossistema BETEL
         </p>
       </footer>
