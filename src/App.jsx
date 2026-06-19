@@ -1,12 +1,13 @@
-import { useLayoutEffect } from 'react'
+import { useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
+// GSAP mantido instalado para uso futuro — não ativo no momento
 gsap.registerPlugin(ScrollTrigger)
 
 /* ── Estilos reutilizáveis ───────────────────────────────────── */
 const SECTION = {
-  padding: '72px 60px 56px',
+  padding: 'clamp(64px, 8vw, 96px) 60px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -91,49 +92,29 @@ const GOVERN_CARDS = [
 /* ── App ─────────────────────────────────────────────────────── */
 export default function App() {
 
-  useLayoutEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  useEffect(() => {
+    const sections = document.querySelectorAll('.fade-section')
 
-    const ctx = gsap.context(() => {
-      const sections = gsap.utils.toArray('[data-scene]')
+    // prefers-reduced-motion: tornar todas visíveis imediatamente
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      sections.forEach(el => el.classList.add('is-visible'))
+      return
+    }
 
-      if (prefersReduced) {
-        sections.forEach((el, i) => {
-          gsap.set(el, { opacity: i === 0 ? 1 : 0 })
-          ScrollTrigger.create({
-            trigger: el,
-            start: 'top 75%',
-            onEnter:     () => gsap.to(el, { opacity: 1, duration: 0.4 }),
-            onLeave:     () => gsap.to(el, { opacity: 0, duration: 0.3 }),
-            onEnterBack: () => gsap.to(el, { opacity: 1, duration: 0.4 }),
-            onLeaveBack: () => gsap.to(el, { opacity: 0, duration: 0.3 }),
-          })
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
         })
-        return
-      }
+      },
+      { threshold: 0.15 }
+    )
 
-      sections.forEach((el, i) => {
-        gsap.set(el, {
-          transformPerspective: 1200,
-          rotateX: i === 0 ? 0 : 45,
-          opacity:  i === 0 ? 1 : 0,
-          y:        i === 0 ? 0 : 60,
-          scale:    i === 0 ? 1 : 0.95,
-        })
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top top',
-          end: '+=100%',
-          pin: true,
-          onEnter:     () => gsap.to(el, { rotateX: 0,   opacity: 1, y: 0,   scale: 1,    duration: 0.8, ease: 'power2.inOut' }),
-          onLeave:     () => gsap.to(el, { rotateX: -45, opacity: 0, y: -60, scale: 0.95, duration: 0.6, ease: 'power2.in'   }),
-          onEnterBack: () => gsap.to(el, { rotateX: 0,   opacity: 1, y: 0,   scale: 1,    duration: 0.8, ease: 'power2.inOut' }),
-          onLeaveBack: () => gsap.to(el, { rotateX: 45,  opacity: 0, y: 60,  scale: 0.95, duration: 0.6, ease: 'power2.in'   }),
-        })
-      })
-    })
-
-    return () => ctx.revert()
+    sections.forEach(el => observer.observe(el))
+    return () => observer.disconnect()
   }, [])
 
   return (
@@ -162,11 +143,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── 1: HERO ────────────────────────────────────────────── */}
-      <section
-        data-scene
-        style={{ ...SECTION, background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}
-      >
+      {/* ── 1: HERO — sem fade, visível imediatamente ──────────── */}
+      <section style={{ ...SECTION, background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}>
         <p style={LABEL}>Sistema privado de governança patrimonial</p>
 
         <h1 style={{
@@ -208,7 +186,7 @@ export default function App() {
       </section>
 
       {/* ── 2: O QUE É ─────────────────────────────────────────── */}
-      <section data-scene style={{ ...SECTION, background: '#FFFFFF' }}>
+      <section className="fade-section" style={{ ...SECTION, background: '#FFFFFF' }}>
         <SectionDivider />
         <p style={LABEL}>O que é</p>
 
@@ -228,7 +206,7 @@ export default function App() {
       </section>
 
       {/* ── 3: GOVERNANÇA ──────────────────────────────────────── */}
-      <section data-scene style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+      <section className="fade-section" style={{ ...SECTION, background: 'var(--cream-warm)' }}>
         <SectionDivider />
         <p style={LABEL}>Governança</p>
 
@@ -260,7 +238,7 @@ export default function App() {
       </section>
 
       {/* ── 4: OS QUATRO PILARES ───────────────────────────────── */}
-      <section data-scene style={{ ...SECTION, background: '#FFFFFF' }}>
+      <section className="fade-section" style={{ ...SECTION, background: '#FFFFFF' }}>
         <SectionDivider />
         <p style={LABEL}>Os quatro pilares</p>
 
@@ -303,7 +281,7 @@ export default function App() {
       </section>
 
       {/* ── 5: OS AGENTES ──────────────────────────────────────── */}
-      <section data-scene style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+      <section className="fade-section" style={{ ...SECTION, background: 'var(--cream-warm)' }}>
         <SectionDivider />
         <p style={LABEL}>Os agentes</p>
 
@@ -346,7 +324,7 @@ export default function App() {
       </section>
 
       {/* ── 6: PRIVACIDADE ─────────────────────────────────────── */}
-      <section data-scene style={{ ...SECTION, background: '#FFFFFF' }}>
+      <section className="fade-section" style={{ ...SECTION, background: '#FFFFFF' }}>
         <SectionDivider />
         <p style={LABEL}>Privacidade</p>
 
@@ -371,7 +349,7 @@ export default function App() {
         </p>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────── */}
+      {/* ── FOOTER — sem fade, sempre visível ──────────────────── */}
       <footer style={{ background: 'var(--text-primary)', padding: '40px 60px', textAlign: 'center' }}>
         <p style={{ fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--gold-light)', margin: '0 0 8px' }}>
           Sistema privado. Acesso restrito.
