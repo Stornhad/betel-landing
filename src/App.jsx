@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 /* ── Estilos reutilizáveis ───────────────────────────────────── */
 const SECTION = {
-  padding: 'clamp(64px, 8vw, 96px) 60px',
+  padding: '120px 60px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -144,7 +144,7 @@ export default function App() {
       </header>
 
       {/* ── 1: HERO — sem fade, visível imediatamente ──────────── */}
-      <section style={{ ...SECTION, background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}>
+      <section style={{ ...SECTION, padding: '140px 60px 100px', background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}>
         <p style={LABEL}>Sistema privado de governança patrimonial</p>
 
         <h1 style={{
