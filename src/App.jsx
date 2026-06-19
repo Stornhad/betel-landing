@@ -4,65 +4,91 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
+/* ── Estilos reutilizáveis ───────────────────────────────────── */
+const SECTION = {
+  padding: '72px 60px 56px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  textAlign: 'center',
+}
+
+const LABEL = {
+  fontWeight: 600,
+  fontSize: '11px',
+  textTransform: 'uppercase',
+  letterSpacing: '3px',
+  color: 'var(--gold-primary)',
+  margin: '0 0 16px',
+}
+
+const HEADLINE = {
+  fontFamily: 'var(--font-display)',
+  fontWeight: 400,
+  fontSize: '42px',
+  color: 'var(--text-primary)',
+  margin: '0 0 32px',
+  lineHeight: 1.15,
+}
+
+/* ── Componentes internos ────────────────────────────────────── */
+const SectionDivider = () => (
+  <div style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.6, margin: '0 auto 28px' }} />
+)
+
 const PILLARS = [
-  {
-    name: 'Casa',
-    desc: 'Gestão patrimonial e financeira da família, com visão de longo prazo.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-        <path d="M3 12L12 3l9 9" /><path d="M9 21V12h6v9" /><path d="M3 12v9h18v-9" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Altar',
-    desc: 'Propósito, valores e legado espiritual como fundação de todas as decisões.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-        <path d="M12 2v10M7 7l5-5 5 5" /><rect x="4" y="12" width="16" height="3" rx="1" /><path d="M6 15v5h12v-5" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Obra',
-    desc: 'Construção técnica contínua — sistemas, automações e inteligência operacional.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-        <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Herança',
-    desc: 'Transmissão de conhecimento, metodologia e patrimônio para as próximas gerações.',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-7 h-7">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-      </svg>
-    ),
-  },
+  { name: 'Casa',    weight: 600, desc: 'Gestão patrimonial e financeira da família, com visão de longo prazo.' },
+  { name: 'Altar',   weight: 600, desc: 'Propósito, valores e legado espiritual como fundação de todas as decisões.' },
+  { name: 'Obra',    weight: 400, desc: 'Construção técnica contínua. Sistemas, automações e inteligência operacional.' },
+  { name: 'Herança', weight: 400, desc: 'Transmissão de conhecimento, metodologia e patrimônio para as próximas gerações.' },
 ]
 
 const AGENTS = [
-  { name: 'JOSÉ',    role: 'Provisão, Legado & Visão de Vida',                initial: 'J' },
-  { name: 'DANIEL',  role: 'Trading Quantitativo & Discernimento de Mercado', initial: 'D' },
-  { name: 'BEZALEL', role: 'Construção Técnica & Desenvolvimento',            initial: 'B' },
-  { name: 'CALEB',   role: 'Análise, Discernimento & Mentoria',               initial: 'C' },
+  {
+    name: 'JOSÉ',
+    icon: 'ti ti-wheat',
+    role: 'Governança patrimonial',
+    desc: 'Governança patrimonial. Autoridade sobre capital, alocação e veto com fundamento registrado.',
+  },
+  {
+    name: 'ISAÍAS',
+    icon: 'ti ti-flame',
+    role: 'Avaliação independente',
+    desc: 'Avaliação de mérito independente. Sem autoridade sobre capital. Fundamento e contexto em cada análise.',
+  },
+  {
+    name: 'DANIEL',
+    icon: 'ti ti-crown',
+    role: 'Análise quantitativa',
+    desc: 'Análise quantitativa e discernimento de mercado. Golden Elephant Project, XAUUSD M2.',
+  },
+  {
+    name: 'BEZALEL',
+    icon: 'ti ti-hammer',
+    role: 'Construção técnica',
+    desc: 'Desenvolvimento e infraestrutura de todos os projetos digitais do ecossistema BETEL.',
+  },
 ]
 
-const STACK = [
-  { name: 'React',        desc: 'Frontend' },
-  { name: 'Supabase',     desc: 'Backend & Auth' },
-  { name: 'Vercel',       desc: 'Deploy & Edge' },
-  { name: 'AWS Bedrock',  desc: 'IA & LLMs' },
+const GOVERN_CARDS = [
+  {
+    agent: 'ISAÍAS',
+    action: 'Avalia o mérito',
+    detail: 'Análise independente da tese. Sem autoridade sobre capital.',
+  },
+  {
+    agent: 'JOSÉ',
+    action: 'Decide e veta',
+    detail: 'Autoridade sobre capital. Veto registrado com fundamento.',
+  },
+  {
+    agent: 'SISTEMA',
+    action: 'Registra com data',
+    detail: 'Fundamento permanente. Rastreabilidade que não pode ser apagada.',
+  },
 ]
 
-const SectionDivider = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-    <div style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.6 }} />
-  </div>
-)
-
+/* ── App ─────────────────────────────────────────────────────── */
 export default function App() {
 
   useLayoutEffect(() => {
@@ -94,7 +120,6 @@ export default function App() {
           y:        i === 0 ? 0 : 60,
           scale:    i === 0 ? 1 : 0.95,
         })
-
         ScrollTrigger.create({
           trigger: el,
           start: 'top top',
@@ -112,18 +137,12 @@ export default function App() {
   }, [])
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: 'var(--cream-base)', color: 'var(--text-primary)', overflowX: 'hidden' }}
-    >
+    <div style={{ background: 'var(--cream-base)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
 
+      {/* Noise overlay */}
       <svg
         aria-hidden="true"
-        style={{
-          position: 'fixed', top: 0, left: 0,
-          width: '100vw', height: '100vh',
-          opacity: 0.03, pointerEvents: 'none', zIndex: 9999,
-        }}
+        style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', opacity: 0.03, pointerEvents: 'none', zIndex: 9999 }}
       >
         <filter id="betel-noise">
           <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch" />
@@ -131,227 +150,234 @@ export default function App() {
         <rect width="100%" height="100%" filter="url(#betel-noise)" />
       </svg>
 
-      {/* ── TOPBAR ─────────────────────────────────────────────── */}
-      <header className="border-b" style={{ borderColor: 'var(--card-border)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <span
-            className="text-xl font-semibold tracking-widest uppercase"
-            style={{ fontFamily: 'var(--font-display)', color: 'var(--gold-warm)', letterSpacing: '0.2em' }}
-          >
+      {/* ── 0: NAV ─────────────────────────────────────────────── */}
+      <header style={{ borderBottom: '1px solid var(--card-border)', background: 'var(--cream-base)' }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 60px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '20px', color: 'var(--gold-primary)', letterSpacing: '4px', textTransform: 'uppercase' }}>
             BETEL
           </span>
-          <a
-            href="https://betel-patrimonio.vercel.app"
-            className="text-xs font-semibold tracking-wider uppercase px-4 py-2 rounded-lg bg-gold-500 hover:bg-gold-400 transition-colors"
-            style={{ color: 'var(--text-primary)', letterSpacing: '0.1em' }}
-          >
+          <a href="https://betel-patrimonio.vercel.app" className="betel-btn betel-btn-nav">
             Acessar
           </a>
         </div>
       </header>
 
-      {/* ── HERO ───────────────────────────────────────────────── */}
+      {/* ── 1: HERO ────────────────────────────────────────────── */}
       <section
         data-scene
-        className="pt-24 pb-20 px-6 text-center"
-        style={{ background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}
+        style={{ ...SECTION, background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}
       >
-        <div className="max-w-3xl mx-auto">
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-6"
-            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
-          >
-            Ecossistema de Agentes de IA
-          </p>
-          <h1
-            className="mb-6 leading-tight"
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: 'clamp(3rem, 8vw, 5.5rem)',
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              letterSpacing: '-0.02em',
-            }}
-          >
-            BETEL
-          </h1>
-          <p
-            className="text-lg leading-relaxed max-w-2xl mx-auto"
-            style={{ color: 'var(--text-secondary)', fontWeight: 400 }}
-          >
-            Plataforma de agentes de IA para gestão patrimonial e operacional inteligente
-          </p>
-          <div className="mt-10 flex flex-col items-center gap-6">
-            <div className="w-16 h-px" style={{ background: 'var(--gold-warm)', opacity: 0.5 }} />
-            <a
-              href="https://betel-patrimonio.vercel.app"
-              className="inline-block px-8 py-3.5 rounded-xl bg-gold-500 hover:bg-gold-400 transition-colors text-sm font-semibold tracking-wider uppercase"
-              style={{ color: 'var(--text-primary)', letterSpacing: '0.12em' }}
-            >
-              Acessar Patrimônio
-            </a>
-          </div>
+        <p style={LABEL}>Sistema privado de governança patrimonial</p>
+
+        <h1 style={{
+          fontFamily: 'var(--font-display)',
+          fontWeight: 300,
+          fontSize: '88px',
+          letterSpacing: '12px',
+          color: 'var(--text-primary)',
+          margin: '0 0 24px',
+          lineHeight: 1,
+        }}>
+          BETEL
+        </h1>
+
+        <div style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.5, margin: '0 auto 24px' }} />
+
+        <p style={{
+          fontFamily: 'var(--font-display)',
+          fontWeight: 400,
+          fontSize: '19px',
+          color: 'var(--text-secondary)',
+          margin: '0 0 36px',
+        }}>
+          Seu patrimônio. Seus agentes. Suas decisões, documentadas.
+        </p>
+
+        <a href="https://betel-patrimonio.vercel.app" className="betel-btn betel-btn-hero">
+          Acessar Patrimônio
+        </a>
+
+        <div style={{ marginTop: 44, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--gold-primary)' }}>
+            scroll
+          </span>
+          <span className="betel-scroll-arrow" style={{ color: 'var(--gold-primary)', fontSize: '16px', lineHeight: 1 }}>
+            ↓
+          </span>
         </div>
       </section>
 
-      {/* ── O QUE É ────────────────────────────────────────────── */}
-      <section
-        data-scene
-        className="py-20 px-6"
-        style={{ background: '#FFFFFF', borderTop: '1px solid var(--card-border)', borderBottom: '1px solid var(--card-border)' }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <SectionDivider />
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
-          >
-            O que é
+      {/* ── 2: O QUE É ─────────────────────────────────────────── */}
+      <section data-scene style={{ ...SECTION, background: '#FFFFFF' }}>
+        <SectionDivider />
+        <p style={LABEL}>O que é</p>
+
+        <h2 style={{ ...HEADLINE, fontSize: '46px', maxWidth: 640 }}>
+          Uma categoria que não existia.
+        </h2>
+
+        <div style={{ maxWidth: 600, textAlign: 'left' }}>
+          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: 1.85, color: 'var(--text-secondary)', marginBottom: '20px' }}>
+            Apps de gestão patrimonial mostram o que aconteceu.<br />
+            O BETEL participa do que vai acontecer.
           </p>
-          <div className="space-y-5 text-base leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            <p>
-              BETEL é um ecossistema privado de agentes de inteligência artificial desenvolvido para apoiar decisões patrimoniais, operacionais e estratégicas com profundidade e rastreabilidade.
-            </p>
-            <p>
-              Cada agente opera em um domínio específico — do controle financeiro ao trading quantitativo, do desenvolvimento técnico à análise comercial — trabalhando de forma coordenada sob uma arquitetura unificada de dados e governança.
-            </p>
-            <p>
-              O sistema é construído sobre tecnologia moderna e segura, com dados tratados com privacidade absoluta e decisões documentadas em cada etapa.
-            </p>
-          </div>
+          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: 1.85, color: 'var(--text-secondary)', margin: 0 }}>
+            Agentes especializados com domínios definidos. Decisões documentadas com data e fundamento. Governança que separa quem avalia de quem decide. Seus dados nunca saem do seu controle.
+          </p>
         </div>
       </section>
 
-      {/* ── OS QUATRO PILARES ──────────────────────────────────── */}
-      <section data-scene className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <SectionDivider />
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
-          >
-            Os Quatro Pilares
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {PILLARS.map((p) => {
-              const isPrimary = p.name === 'Casa' || p.name === 'Altar'
-              return (
-                <div
-                  key={p.name}
-                  className="rounded-xl p-6"
-                  style={{
-                    background: '#FFFFFF',
-                    border: '1px solid var(--card-border)',
-                    borderLeft: isPrimary ? '2px solid var(--gold-primary)' : '1px solid var(--card-border)',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-                  }}
-                >
-                  <div className="mb-4" style={{ color: 'var(--gold-warm)' }}>{p.icon}</div>
-                  <h3
-                    className="text-xl mb-2"
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontWeight: isPrimary ? 600 : 400,
-                      color: 'var(--text-primary)',
-                    }}
-                  >
-                    {p.name}
-                  </h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{p.desc}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
+      {/* ── 3: GOVERNANÇA ──────────────────────────────────────── */}
+      <section data-scene style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+        <SectionDivider />
+        <p style={LABEL}>Governança</p>
 
-      {/* ── OS AGENTES ─────────────────────────────────────────── */}
-      <section
-        data-scene
-        className="py-20 px-6"
-        style={{ background: '#FFFFFF', borderTop: '1px solid var(--card-border)', borderBottom: '1px solid var(--card-border)' }}
-      >
-        <div className="max-w-5xl mx-auto">
-          <SectionDivider />
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
-          >
-            Os Agentes
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
-            {AGENTS.map((a) => (
-              <div
-                key={a.name}
-                className="flex items-center gap-4 rounded-xl p-5"
-                style={{ background: 'var(--cream-base)', border: '1px solid var(--card-border)' }}
-              >
-                <div
-                  className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: 'var(--gold-light)',
-                    color: 'var(--gold-dark)',
-                    fontFamily: 'var(--font-display)',
-                    fontWeight: 500,
-                    fontSize: '1.1rem',
-                  }}
-                >
-                  {a.initial}
-                </div>
-                <div>
-                  <div
-                    className="text-sm font-semibold tracking-wider"
-                    style={{ color: 'var(--text-primary)', letterSpacing: '0.08em' }}
-                  >
-                    {a.name}
-                  </div>
-                  <div className="text-xs mt-0.5 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{a.role}</div>
-                </div>
+        <h2 style={{ ...HEADLINE, maxWidth: 560 }}>
+          Do insight à alocação, com rastreabilidade completa.
+        </h2>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 760 }}>
+          {GOVERN_CARDS.flatMap((c, i) => {
+            const card = (
+              <div key={c.agent} style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: 8, padding: '22px 14px', minWidth: 190, flex: '1 1 190px', maxWidth: 220 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '15px', color: 'var(--gold-primary)', margin: '0 0 6px' }}>
+                  {c.agent}
+                </p>
+                <p style={{ fontWeight: 600, fontSize: '11px', color: 'var(--text-primary)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                  {c.action}
+                </p>
+                <p style={{ fontWeight: 400, fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  {c.detail}
+                </p>
               </div>
-            ))}
-          </div>
+            )
+            const arrow = i < GOVERN_CARDS.length - 1
+              ? <span key={`arrow-${i}`} style={{ color: 'var(--gold-primary)', fontSize: '15px', flexShrink: 0 }}>→</span>
+              : null
+            return arrow ? [card, arrow] : [card]
+          })}
         </div>
       </section>
 
-      {/* ── STACK TÉCNICA ──────────────────────────────────────── */}
-      <section data-scene className="py-20 px-6">
-        <div className="max-w-5xl mx-auto">
-          <SectionDivider />
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-10 text-center"
-            style={{ color: 'var(--gold-warm)', letterSpacing: '0.22em' }}
-          >
-            Stack Técnica
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            {STACK.map((s) => (
+      {/* ── 4: OS QUATRO PILARES ───────────────────────────────── */}
+      <section data-scene style={{ ...SECTION, background: '#FFFFFF' }}>
+        <SectionDivider />
+        <p style={LABEL}>Os quatro pilares</p>
+
+        <h2 style={HEADLINE}>
+          Construído sobre fundações.
+        </h2>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, maxWidth: 860, width: '100%' }}>
+          {PILLARS.map((p) => {
+            const isPrimary = p.name === 'Casa' || p.name === 'Altar'
+            return (
               <div
-                key={s.name}
-                className="rounded-lg px-6 py-4 text-center min-w-[130px]"
+                key={p.name}
+                className="pilar-card"
                 style={{
                   background: '#FFFFFF',
                   border: '1px solid var(--card-border)',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                  borderLeft: isPrimary ? '2px solid var(--gold-primary)' : '1px solid var(--card-border)',
+                  borderRadius: isPrimary ? '0 8px 8px 0' : '8px',
+                  minHeight: 120,
                 }}
               >
-                <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{s.name}</div>
-                <div className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>{s.desc}</div>
+                <div
+                  className="pilar-name"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 120, padding: '16px 14px' }}
+                >
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: p.weight, fontSize: '22px', color: 'var(--text-primary)' }}>
+                    {p.name}
+                  </span>
+                </div>
+                <div className="pilar-desc">
+                  <p style={{ fontWeight: 400, fontSize: '12px', lineHeight: 1.65, color: 'var(--text-secondary)', margin: 0 }}>
+                    {p.desc}
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
+            )
+          })}
         </div>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────── */}
-      <footer
-        className="py-10 px-6 text-center"
-        style={{ borderTop: '1px solid var(--card-border)', background: 'var(--cream-warm)' }}
-      >
-        <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--text-secondary)', letterSpacing: '0.18em' }}>
-          Sistema privado — acesso restrito
+      {/* ── 5: OS AGENTES ──────────────────────────────────────── */}
+      <section data-scene style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+        <SectionDivider />
+        <p style={LABEL}>Os agentes</p>
+
+        <h2 style={HEADLINE}>
+          Cada domínio tem um responsável.
+        </h2>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, maxWidth: 540, width: '100%' }}>
+          {AGENTS.map((a) => (
+            <div
+              key={a.name}
+              className="agent-card"
+              style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: 8, padding: 22, minHeight: 84 }}
+            >
+              <div className="agent-content">
+                <div style={{
+                  width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--gold-light)', color: 'var(--gold-dark)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <i className={a.icon} style={{ fontSize: '20px' }} />
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-primary)', marginBottom: 2 }}>
+                    {a.name}
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+                    {a.role}
+                  </div>
+                </div>
+              </div>
+              <div className="agent-desc">
+                <p style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
+                  {a.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── 6: PRIVACIDADE ─────────────────────────────────────── */}
+      <section data-scene style={{ ...SECTION, background: '#FFFFFF' }}>
+        <SectionDivider />
+        <p style={LABEL}>Privacidade</p>
+
+        <h2 style={{ ...HEADLINE, maxWidth: 560 }}>
+          Seus dados não alimentam nenhum produto.
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+          {[
+            'Nenhuma corretora tem acesso.',
+            'Nenhum anúncio usa o que é seu.',
+            'Nenhum algoritmo de terceiro aprende com suas decisões.',
+          ].map((s) => (
+            <p key={s} style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '21px', color: 'var(--text-secondary)', margin: 0 }}>
+              {s}
+            </p>
+          ))}
+        </div>
+
+        <p style={{ fontWeight: 400, fontSize: '16px', color: 'var(--text-secondary)', maxWidth: 480, margin: 0 }}>
+          O BETEL roda na sua infraestrutura, com suas credenciais, sob suas regras.
         </p>
-        <p className="text-xs mt-2" style={{ color: 'var(--text-secondary)' }}>
-          © {new Date().getFullYear()} Ecossistema BETEL
+      </section>
+
+      {/* ── FOOTER ─────────────────────────────────────────────── */}
+      <footer style={{ background: 'var(--text-primary)', padding: '40px 60px', textAlign: 'center' }}>
+        <p style={{ fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--gold-light)', margin: '0 0 8px' }}>
+          Sistema privado. Acesso restrito.
+        </p>
+        <p style={{ fontWeight: 400, fontSize: '11px', color: 'var(--text-secondary)', margin: 0 }}>
+          &copy; {new Date().getFullYear()} Ecossistema BETEL
         </p>
       </footer>
 

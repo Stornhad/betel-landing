@@ -21,7 +21,6 @@
   --text-label:      0.688rem;
   --text-caption:    0.563rem;
 
-  /* ── Tokens de cor semânticos ───────────────────────────── */
   --gold-primary: #B8860B;
   --gold-warm:    #C9A028;
   --gold-light:   #E8D9A0;
@@ -53,3 +52,76 @@ body {
   background-color: var(--color-gold-300);
   color: var(--text-primary);
 }
+
+/* ── Botão canônico ────────────────────────────────────────── */
+.betel-btn {
+  display: inline-block;
+  background: var(--gold-primary);
+  color: #fff;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 200ms;
+}
+.betel-btn:hover { background: var(--gold-warm); }
+.betel-btn-nav  { padding: 14px 28px; }
+.betel-btn-hero { padding: 18px 40px; }
+
+/* ── Scroll indicator ──────────────────────────────────────── */
+@keyframes betel-scroll-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(7px); }
+}
+.betel-scroll-arrow {
+  animation: betel-scroll-bounce 1.5s ease-in-out infinite;
+  display: block;
+}
+
+/* ── Pilares card hover ────────────────────────────────────── */
+.pilar-card { position: relative; overflow: hidden; cursor: default; }
+
+.pilar-card .pilar-name {
+  transition: opacity 200ms;
+}
+.pilar-card .pilar-desc {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 14px;
+  opacity: 0;
+  transition: opacity 200ms;
+}
+.pilar-card:hover .pilar-name { opacity: 0; }
+.pilar-card:hover .pilar-desc { opacity: 1; }
+
+/* ── Agentes card hover ────────────────────────────────────── */
+.agent-card { position: relative; overflow: hidden; cursor: default; }
+
+.agent-card .agent-content {
+  transition: opacity 200ms;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.agent-card .agent-desc {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 16px;
+  opacity: 0;
+  transition: opacity 200ms;
+  text-align: center;
+}
+.agent-card:hover .agent-content { opacity: 0; }
+.agent-card:hover .agent-desc    { opacity: 1; }
