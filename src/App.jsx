@@ -1,4 +1,8 @@
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const PILLARS = [
   {
@@ -53,7 +57,6 @@ const STACK = [
   { name: 'AWS Bedrock',  desc: 'IA & LLMs' },
 ]
 
-// Separador dourado entre seções
 const SectionDivider = () => (
   <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
     <div style={{ width: 48, height: 1, background: '#B8860B', opacity: 0.6 }} />
@@ -62,54 +65,50 @@ const SectionDivider = () => (
 
 export default function App() {
 
-  useEffect(() => {
-    const scenes = Array.from(document.querySelectorAll('[data-scene]'))
+  useLayoutEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    // Classificação síncrona sem transição: seções fora do viewport ficam invisíveis
-    // imediatamente (sem flash, pois são off-screen)
-    scenes.forEach(el => {
-      const rect = el.getBoundingClientRect()
-      if (rect.top >= window.innerHeight) {
-        el.classList.add('scene-below')
-      } else if (rect.bottom <= 0) {
-        el.classList.add('scene-exit')
-      }
-      // Seções no viewport ficam sem classe → totalmente visíveis (comportamento padrão)
-    })
+    const ctx = gsap.context(() => {
+      const sections = gsap.utils.toArray('[data-scene]')
 
-    let io = null
-
-    // Habilitar transições após primeiro frame (evita transições no classify acima)
-    const rafId = requestAnimationFrame(() => {
-      scenes.forEach(el => el.classList.add('scene-ready'))
-
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(entry => {
-            const el = entry.target
-            el.classList.remove('scene-active', 'scene-below', 'scene-exit')
-
-            if (entry.isIntersecting) {
-              el.classList.add('scene-active')
-            } else if (entry.boundingClientRect.top < 0) {
-              // Seção saiu pelo topo → foi scrollada para cima
-              el.classList.add('scene-exit')
-            } else {
-              // Seção ainda não entrou (abaixo do viewport)
-              el.classList.add('scene-below')
-            }
+      if (prefersReduced) {
+        sections.forEach((el, i) => {
+          gsap.set(el, { opacity: i === 0 ? 1 : 0 })
+          ScrollTrigger.create({
+            trigger: el,
+            start: 'top 75%',
+            onEnter:     () => gsap.to(el, { opacity: 1, duration: 0.4 }),
+            onLeave:     () => gsap.to(el, { opacity: 0, duration: 0.3 }),
+            onEnterBack: () => gsap.to(el, { opacity: 1, duration: 0.4 }),
+            onLeaveBack: () => gsap.to(el, { opacity: 0, duration: 0.3 }),
           })
-        },
-        { threshold: 0.08 }
-      )
+        })
+        return
+      }
 
-      scenes.forEach(el => io.observe(el))
+      sections.forEach((el, i) => {
+        gsap.set(el, {
+          transformPerspective: 1200,
+          rotateX: i === 0 ? 0 : 45,
+          opacity:  i === 0 ? 1 : 0,
+          y:        i === 0 ? 0 : 60,
+          scale:    i === 0 ? 1 : 0.95,
+        })
+
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top top',
+          end: '+=100%',
+          pin: true,
+          onEnter:     () => gsap.to(el, { rotateX: 0,   opacity: 1, y: 0,   scale: 1,    duration: 0.8, ease: 'power2.inOut' }),
+          onLeave:     () => gsap.to(el, { rotateX: -45, opacity: 0, y: -60, scale: 0.95, duration: 0.6, ease: 'power2.in'   }),
+          onEnterBack: () => gsap.to(el, { rotateX: 0,   opacity: 1, y: 0,   scale: 1,    duration: 0.8, ease: 'power2.inOut' }),
+          onLeaveBack: () => gsap.to(el, { rotateX: 45,  opacity: 0, y: 60,  scale: 0.95, duration: 0.6, ease: 'power2.in'   }),
+        })
+      })
     })
 
-    return () => {
-      cancelAnimationFrame(rafId)
-      io?.disconnect()
-    }
+    return () => ctx.revert()
   }, [])
 
   return (
@@ -118,7 +117,8 @@ export default function App() {
       style={{ background: '#F7F4EE', color: '#1C1A13', overflowX: 'hidden' }}
     >
 
-      {/* Noise overlay — SVG feTurbulence inline, 0 bytes de asset externo */}
+      {/* Noise overlay — SVG feTurbulence inline; transformPerspective em gsap por-elemento
+          para não quebrar position:fixed do overlay e das seções pinadas */}
       <svg
         aria-hidden="true"
         style={{
@@ -133,7 +133,7 @@ export default function App() {
         <rect width="100%" height="100%" filter="url(#betel-noise)" />
       </svg>
 
-      {/* ── TOPBAR — estático, sem scene effect ────────────────── */}
+      {/* ── TOPBAR ─────────────────────────────────────────────── */}
       <header className="border-b" style={{ borderColor: '#EDE8DC' }}>
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <span
@@ -344,7 +344,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* ── FOOTER — estático, sem scene effect ────────────────── */}
+      {/* ── FOOTER ─────────────────────────────────────────────── */}
       <footer
         className="py-10 px-6 text-center"
         style={{ borderTop: '1px solid #EDE8DC', background: '#F5F0E8' }}
