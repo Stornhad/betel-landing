@@ -1,19 +1,13 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-// GSAP mantido instalado para uso futuro — não ativo no momento
+// Code-split: Three.js carrega assíncrono, fora do bundle inicial
+const ThreeBackground = lazy(() => import('./ThreeBackground'))
+
 gsap.registerPlugin(ScrollTrigger)
 
 /* ── Estilos reutilizáveis ───────────────────────────────────── */
-const SECTION = {
-  padding: '80px 60px',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  textAlign: 'center',
-}
-
 const LABEL = {
   fontWeight: 600,
   fontSize: '11px',
@@ -32,11 +26,11 @@ const HEADLINE = {
   lineHeight: 1.15,
 }
 
-/* ── Componentes internos ────────────────────────────────────── */
 const SectionDivider = ({ className = '' }) => (
   <div className={className} style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.6, margin: '0 auto 28px' }} />
 )
 
+/* ── Dados ───────────────────────────────────────────────────── */
 const PILLARS = [
   { name: 'Casa',    weight: 600, desc: 'Gestão patrimonial e financeira da família, com visão de longo prazo.' },
   { name: 'Altar',   weight: 600, desc: 'Propósito, valores e legado espiritual como fundação de todas as decisões.' },
@@ -45,36 +39,16 @@ const PILLARS = [
 ]
 
 const AGENTS = [
-  {
-    name: 'JOSÉ',
-    icon: 'ti ti-wheat',
-    role: 'Governança patrimonial',
-    desc: 'Governança patrimonial. Autoridade sobre capital, alocação e veto com fundamento registrado.',
-  },
-  {
-    name: 'ISAÍAS',
-    icon: 'ti ti-flame',
-    role: 'Avaliação independente',
-    desc: 'Avaliação de mérito independente. Sem autoridade sobre capital. Fundamento e contexto em cada análise.',
-  },
-  {
-    name: 'DANIEL',
-    icon: 'ti ti-crown',
-    role: 'Análise quantitativa',
-    desc: 'Análise quantitativa e discernimento de mercado. Golden Elephant Project, XAUUSD M2.',
-  },
-  {
-    name: 'BEZALEL',
-    icon: 'ti ti-hammer',
-    role: 'Construção técnica',
-    desc: 'Desenvolvimento e infraestrutura de todos os projetos digitais do ecossistema BETEL.',
-  },
+  { name: 'JOSÉ',    icon: 'ti ti-wheat',  role: 'Provisão e Legado',       desc: 'Governança patrimonial. Autoridade sobre capital, alocação e veto com fundamento registrado.' },
+  { name: 'ISAÍAS',  icon: 'ti ti-flame',  role: 'Análise de Teses',        desc: 'Avaliação de mérito independente. Sem autoridade sobre capital. Fundamento e contexto em cada análise.' },
+  { name: 'DANIEL',  icon: 'ti ti-crown',  role: 'Trading Quantitativo',    desc: 'Análise quantitativa e discernimento de mercado. Golden Elephant Project, XAUUSD M2.' },
+  { name: 'BEZALEL', icon: 'ti ti-hammer', role: 'Construção Técnica',      desc: 'Desenvolvimento e infraestrutura de todos os projetos digitais do ecossistema BETEL.' },
 ]
 
 const GOVERN_CARDS = [
-  { agent: 'ISAÍAS', action: 'Avalia o mérito',   detail: 'Análise independente da tese. Sem autoridade sobre capital.' },
-  { agent: 'JOSÉ',   action: 'Decide e veta',      detail: 'Autoridade sobre capital. Veto registrado com fundamento.' },
-  { agent: 'SISTEMA',action: 'Registra com data',  detail: 'Fundamento permanente. Rastreabilidade que não pode ser apagada.' },
+  { agent: 'ISAÍAS',  action: 'Avalia o mérito',   detail: 'Análise independente da tese. Sem autoridade sobre capital.',         dir: 'from-left' },
+  { agent: 'JOSÉ',    action: 'Decide e veta',     detail: 'Autoridade sobre capital. Veto registrado com fundamento.',           dir: 'from-bottom' },
+  { agent: 'SISTEMA', action: 'Registra com data', detail: 'Fundamento permanente. Rastreabilidade que não pode ser apagada.',    dir: 'from-right' },
 ]
 
 const PRIVACY_PHRASES = [
@@ -85,230 +59,183 @@ const PRIVACY_PHRASES = [
 
 /* ── App ─────────────────────────────────────────────────────── */
 export default function App() {
+  const scrollProgressRef = useRef(0)
   const scrollLineRef = useRef(null)
+  // Decide modo imersivo: 3D só em desktop sem reduced-motion
+  const [immersive] = useState(() =>
+    typeof window !== 'undefined' &&
+    window.innerWidth >= 768 &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
 
   useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-    // Linha de progresso de scroll
-    const scrollLine = scrollLineRef.current
+    // Linha de progresso + alimentação do scroll para a cena 3D
     const handleScroll = () => {
-      if (!scrollLine) return
       const max = document.documentElement.scrollHeight - window.innerHeight
-      scrollLine.style.height = max > 0 ? (window.scrollY / max * 100) + 'vh' : '0'
+      const p = max > 0 ? window.scrollY / max : 0
+      scrollProgressRef.current = p
+      if (scrollLineRef.current) scrollLineRef.current.style.height = (p * 100) + 'vh'
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
 
-    if (prefersReduced) {
-      document.querySelectorAll('.reveal, .reveal-lateral-item').forEach(el => el.classList.add('visible'))
+    const scenes = gsap.utils.toArray('.scene')
+
+    // Sem modo imersivo (mobile / reduced-motion): tudo visível, sem pin
+    if (!immersive) {
+      scenes.forEach(el => el.classList.add('in'))
       return () => window.removeEventListener('scroll', handleScroll)
     }
 
-    // Stagger reveal geral
-    const revealObserver = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target) }
-      }),
-      { threshold: 0.15 }
-    )
-    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el))
+    // Modo imersivo: pin por seção + revelação no enter
+    const triggers = []
+    gsap.utils.toArray('[data-pin]').forEach(section => {
+      const isScene = section.classList.contains('scene')
+      triggers.push(ScrollTrigger.create({
+        trigger: section,
+        start: 'top top',
+        end: '+=100%',
+        pin: true,
+        pinSpacing: true,
+        onEnter:     () => isScene && section.classList.add('in'),
+        onEnterBack: () => isScene && section.classList.add('in'),
+      }))
+    })
 
-    // Privacidade: stagger lateral com setTimeout
-    let lateralObserver = null
-    const lateralContainer = document.querySelector('.reveal-lateral-container')
-    if (lateralContainer) {
-      lateralObserver = new IntersectionObserver(
-        entries => entries.forEach(e => {
-          if (e.isIntersecting) {
-            Array.from(e.target.querySelectorAll('.reveal-lateral-item')).forEach((item, i) => {
-              setTimeout(() => item.classList.add('visible'), i * 400)
-            })
-            lateralObserver.unobserve(e.target)
-          }
-        }),
-        { threshold: 0.3 }
-      )
-      lateralObserver.observe(lateralContainer)
-    }
+    ScrollTrigger.refresh()
 
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      revealObserver.disconnect()
-      lateralObserver?.disconnect()
+      triggers.forEach(t => t.kill())
     }
-  }, [])
+  }, [immersive])
+
+  const sectionBase = {
+    position: 'relative',
+    zIndex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    minHeight: immersive ? '100vh' : 'auto',
+    padding: immersive ? '0 60px' : '80px 60px',
+  }
 
   return (
-    <div style={{ background: 'var(--cream-base)', color: 'var(--text-primary)', overflowX: 'hidden' }}>
+    <div style={{ position: 'relative', overflowX: 'hidden' }}>
 
-      {/* Noise overlay */}
-      <svg
-        aria-hidden="true"
-        style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', opacity: 0.03, pointerEvents: 'none', zIndex: 9999 }}
-      >
-        <filter id="betel-noise">
-          <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#betel-noise)" />
-      </svg>
+      {/* Cena 3D (apenas modo imersivo, carregada de forma assíncrona) */}
+      {immersive && (
+        <Suspense fallback={null}>
+          <ThreeBackground scrollProgressRef={scrollProgressRef} />
+        </Suspense>
+      )}
 
       {/* Linha de progresso vertical */}
       <div
         ref={scrollLineRef}
         style={{
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          width: 3,
-          height: 0,
+          position: 'fixed', left: 0, top: 0, width: 3, height: 0,
           background: 'linear-gradient(to bottom, transparent, var(--gold-primary), transparent)',
-          zIndex: 99,
-          pointerEvents: 'none',
+          zIndex: 99, pointerEvents: 'none',
         }}
       />
 
-      {/* ── 0: NAV ─────────────────────────────────────────────── */}
-      <header style={{ borderBottom: '1px solid var(--card-border)', background: 'var(--cream-base)' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 60px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span
-            style={{
-              fontFamily: 'var(--font-display)',
-              fontWeight: 400,
-              fontSize: '20px',
-              color: 'var(--gold-primary)',
-              letterSpacing: '4px',
-              textTransform: 'uppercase',
-              opacity: 0,
-              animation: 'fadeIn 1s 0.5s forwards',
-            }}
-          >
+      {/* ── NAV (fixed) ────────────────────────────────────────── */}
+      <header style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        background: 'rgba(10,10,10,0.85)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        borderBottom: '0.5px solid rgba(184,134,11,0.15)',
+      }}>
+        <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 60px', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{
+            fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '20px',
+            color: 'var(--gold-primary)', letterSpacing: '4px', textTransform: 'uppercase',
+            opacity: 0, animation: 'fadeIn 1s 0.5s forwards',
+          }}>
             BETEL
           </span>
-          <a
-            href="https://betel-patrimonio.vercel.app"
-            className="betel-btn betel-btn-nav"
-            style={{ opacity: 0, animation: 'fadeIn 1s 0.7s forwards' }}
-          >
+          <a href="https://betel-patrimonio.vercel.app" className="betel-btn betel-btn-nav" style={{ opacity: 0, animation: 'fadeIn 1s 0.7s forwards' }}>
             Acessar
           </a>
         </div>
       </header>
 
       {/* ── 1: HERO ────────────────────────────────────────────── */}
-      <section style={{
-        ...SECTION,
-        padding: '140px 60px 100px',
-        minHeight: '100vh',
-        background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))',
-        justifyContent: 'center',
-      }}>
+      <section data-pin style={sectionBase}>
         <p style={{ ...LABEL, opacity: 0, animation: 'slideUp 0.8s 0.3s forwards' }}>
           Sistema privado de governança patrimonial
         </p>
 
         <h1 style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 300,
-          fontSize: '88px',
-          letterSpacing: '12px',
-          color: 'var(--text-primary)',
-          margin: '0 0 24px',
-          lineHeight: 1,
+          fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '96px',
+          letterSpacing: '16px', color: 'var(--gold-light)', margin: '0 0 24px', lineHeight: 1,
         }}>
           {'BETEL'.split('').map((letter, i) => (
-            <span
-              key={i}
-              style={{
-                display: 'inline-block',
-                opacity: 0,
-                animation: `letterReveal 0.6s ${0.6 + i * 0.12}s forwards`,
-              }}
-            >
+            <span key={i} style={{ display: 'inline-block', opacity: 0, animation: `letterReveal 0.6s ${0.6 + i * 0.12}s forwards` }}>
               {letter}
             </span>
           ))}
         </h1>
 
-        <div style={{
-          width: 0,
-          height: 1,
-          background: 'var(--gold-primary)',
-          opacity: 0.5,
-          margin: '0 auto 24px',
-          animation: 'lineExpand 0.8s 1.3s forwards',
-        }} />
+        <div style={{ width: 0, height: 1, background: 'var(--gold-primary)', margin: '0 auto 24px', animation: 'lineExpand 0.8s 1.3s forwards' }} />
 
         <p style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 400,
-          fontSize: '19px',
-          color: 'var(--text-secondary)',
-          margin: '0 0 36px',
-          opacity: 0,
-          animation: 'fadeIn 1s 1.6s forwards',
+          fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '19px',
+          color: 'var(--text-secondary)', margin: '0 0 36px',
+          opacity: 0, animation: 'fadeIn 1s 1.6s forwards',
         }}>
           Seu patrimônio. Seus agentes. Suas decisões, documentadas.
         </p>
 
-        <a
-          href="https://betel-patrimonio.vercel.app"
-          className="betel-btn betel-btn-hero"
-          style={{ opacity: 0, animation: 'slideUp 0.8s 1.9s forwards' }}
-        >
+        <a href="https://betel-patrimonio.vercel.app" className="betel-btn betel-btn-hero" style={{ opacity: 0, animation: 'slideUp 0.8s 1.9s forwards' }}>
           Acessar Patrimônio
         </a>
+
+        <div style={{ marginTop: 44, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, opacity: 0, animation: 'fadeIn 1s 2.4s forwards' }}>
+          <span style={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--gold-primary)' }}>scroll</span>
+          <i className="ti ti-chevron-down betel-scroll-arrow" style={{ color: 'var(--gold-primary)', fontSize: '16px' }} />
+        </div>
       </section>
 
       {/* ── 2: O QUE É ─────────────────────────────────────────── */}
-      <section style={{ ...SECTION, background: '#FFFFFF' }}>
+      <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
         <p className="reveal reveal-delay-1" style={LABEL}>O que é</p>
-
-        <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, fontSize: '46px', maxWidth: 640 }}>
+        <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, fontSize: '48px', maxWidth: 640 }}>
           Uma categoria que não existia.
         </h2>
-
         <div className="reveal reveal-delay-3" style={{ maxWidth: 600, textAlign: 'left' }}>
-          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: 1.85, color: 'var(--text-secondary)', marginBottom: '20px' }}>
+          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: 1.85, color: 'var(--text-muted)', marginBottom: '20px' }}>
             Apps de gestão patrimonial mostram o que aconteceu.<br />
             O BETEL participa do que vai acontecer.
           </p>
-          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: 1.85, color: 'var(--text-secondary)', margin: 0 }}>
+          <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: 1.85, color: 'var(--text-muted)', margin: 0 }}>
             Agentes especializados com domínios definidos. Decisões documentadas com data e fundamento. Governança que separa quem avalia de quem decide. Seus dados nunca saem do seu controle.
           </p>
         </div>
       </section>
 
       {/* ── 3: GOVERNANÇA ──────────────────────────────────────── */}
-      <section style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+      <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
         <p className="reveal reveal-delay-1" style={LABEL}>Governança</p>
-
         <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, maxWidth: 560 }}>
           Do insight à alocação, com rastreabilidade completa.
         </h2>
-
-        <div className="reveal reveal-delay-3" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 760 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 760 }}>
           {GOVERN_CARDS.flatMap((c, i) => {
             const card = (
-              <div
-                key={c.agent}
-                className="govern-card"
-                style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: 8, padding: '22px 14px', minWidth: 190, flex: '1 1 190px', maxWidth: 220 }}
-              >
-                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '15px', color: 'var(--gold-primary)', margin: '0 0 6px' }}>
-                  {c.agent}
-                </p>
-                <p style={{ fontWeight: 600, fontSize: '11px', color: 'var(--text-primary)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-                  {c.action}
-                </p>
-                <p style={{ fontWeight: 400, fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-                  {c.detail}
-                </p>
+              <div key={c.agent} className={`glass-card ${c.dir}`} style={{ padding: '22px 14px', minWidth: 190, flex: '1 1 190px', maxWidth: 220 }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '16px', color: 'var(--gold-primary)', margin: '0 0 6px' }}>{c.agent}</p>
+                <p style={{ fontWeight: 600, fontSize: '12px', color: 'var(--text-primary)', margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '1px' }}>{c.action}</p>
+                <p style={{ fontWeight: 400, fontSize: '11px', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>{c.detail}</p>
               </div>
             )
             const arrow = i < GOVERN_CARDS.length - 1
-              ? <span key={`arrow-${i}`} style={{ color: 'var(--gold-primary)', fontSize: '15px', flexShrink: 0 }}>→</span>
+              ? <span key={`arrow-${i}`} className="reveal reveal-delay-3" style={{ color: 'var(--gold-primary)', fontSize: '15px', flexShrink: 0 }}>→</span>
               : null
             return arrow ? [card, arrow] : [card]
           })}
@@ -316,41 +243,28 @@ export default function App() {
       </section>
 
       {/* ── 4: OS QUATRO PILARES ───────────────────────────────── */}
-      <section style={{ ...SECTION, background: '#FFFFFF' }}>
+      <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
         <p className="reveal reveal-delay-1" style={LABEL}>Os quatro pilares</p>
-
-        <h2 className="reveal reveal-delay-2" style={HEADLINE}>
-          Construído sobre fundações.
-        </h2>
-
+        <h2 className="reveal reveal-delay-2" style={HEADLINE}>Construído sobre fundações.</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, maxWidth: 860, width: '100%' }}>
           {PILLARS.map((p, idx) => {
             const isPrimary = p.name === 'Casa' || p.name === 'Altar'
             return (
               <div
                 key={p.name}
-                className={`pilar-card reveal reveal-delay-${idx + 1}`}
+                className={`glass-card pilar-card reveal reveal-delay-${idx + 1}`}
                 style={{
-                  background: '#FFFFFF',
-                  border: '1px solid var(--card-border)',
-                  borderLeft: isPrimary ? '2px solid var(--gold-primary)' : '1px solid var(--card-border)',
+                  borderLeft: isPrimary ? '2px solid var(--gold-primary)' : '1px solid var(--glass-border)',
                   borderRadius: isPrimary ? '0 8px 8px 0' : '8px',
                   minHeight: 120,
                 }}
               >
-                <div
-                  className="pilar-name"
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 120, padding: '16px 14px' }}
-                >
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: p.weight, fontSize: '22px', color: 'var(--text-primary)' }}>
-                    {p.name}
-                  </span>
+                <div className="pilar-name" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 120, padding: '16px 14px' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: p.weight, fontSize: '22px', color: 'var(--text-primary)' }}>{p.name}</span>
                 </div>
                 <div className="pilar-desc">
-                  <p style={{ fontWeight: 400, fontSize: '12px', lineHeight: 1.65, color: 'var(--text-secondary)', margin: 0 }}>
-                    {p.desc}
-                  </p>
+                  <p style={{ fontWeight: 400, fontSize: '12px', lineHeight: 1.65, color: 'var(--text-muted)', margin: 0 }}>{p.desc}</p>
                 </div>
               </div>
             )
@@ -359,42 +273,24 @@ export default function App() {
       </section>
 
       {/* ── 5: OS AGENTES ──────────────────────────────────────── */}
-      <section style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+      <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
         <p className="reveal reveal-delay-1" style={LABEL}>Os agentes</p>
-
-        <h2 className="reveal reveal-delay-2" style={HEADLINE}>
-          Cada domínio tem um responsável.
-        </h2>
-
+        <h2 className="reveal reveal-delay-2" style={HEADLINE}>Cada domínio tem um responsável.</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, maxWidth: 540, width: '100%' }}>
           {AGENTS.map((a, idx) => (
-            <div
-              key={a.name}
-              className={`agent-card reveal reveal-delay-${idx + 1}`}
-              style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: 8, padding: 22, minHeight: 84 }}
-            >
+            <div key={a.name} className={`glass-card agent-card reveal reveal-delay-${idx + 1}`} style={{ padding: 22, minHeight: 84 }}>
               <div className="agent-content">
-                <div style={{
-                  width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-                  background: 'var(--gold-light)', color: 'var(--gold-dark)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, background: 'rgba(232,217,160,0.15)', color: 'var(--gold-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <i className={a.icon} style={{ fontSize: '20px' }} />
                 </div>
                 <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-primary)', marginBottom: 2 }}>
-                    {a.name}
-                  </div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
-                    {a.role}
-                  </div>
+                  <div style={{ fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px', color: 'var(--text-primary)', marginBottom: 2 }}>{a.name}</div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{a.role}</div>
                 </div>
               </div>
               <div className="agent-desc">
-                <p style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-secondary)', lineHeight: 1.6, margin: 0 }}>
-                  {a.desc}
-                </p>
+                <p style={{ fontSize: '11px', fontWeight: 400, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>{a.desc}</p>
               </div>
             </div>
           ))}
@@ -402,29 +298,26 @@ export default function App() {
       </section>
 
       {/* ── 6: PRIVACIDADE ─────────────────────────────────────── */}
-      <section style={{ ...SECTION, background: '#FFFFFF' }}>
+      <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
         <p className="reveal reveal-delay-1" style={LABEL}>Privacidade</p>
-
         <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, maxWidth: 560 }}>
           Seus dados não alimentam nenhum produto.
         </h2>
-
-        <div className="reveal-lateral-container" style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
           {PRIVACY_PHRASES.map((s) => (
-            <p key={s} className="reveal-lateral-item" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '21px', color: 'var(--text-secondary)', margin: 0 }}>
+            <p key={s} className="reveal-lateral" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '22px', color: 'var(--text-muted)', margin: 0 }}>
               {s}
             </p>
           ))}
         </div>
-
-        <p className="reveal reveal-delay-3" style={{ fontWeight: 400, fontSize: '16px', color: 'var(--text-secondary)', maxWidth: 480, margin: 0 }}>
+        <p className="reveal reveal-delay-3" style={{ fontWeight: 400, fontSize: '16px', color: 'var(--text-muted)', maxWidth: 480, margin: 0 }}>
           O BETEL roda na sua infraestrutura, com suas credenciais, sob suas regras.
         </p>
       </section>
 
-      {/* ── FOOTER ─────────────────────────────────────────────── */}
-      <footer style={{ background: 'var(--text-primary)', padding: '40px 60px', textAlign: 'center' }}>
+      {/* ── FOOTER (scroll normal) ─────────────────────────────── */}
+      <footer style={{ position: 'relative', zIndex: 1, background: 'var(--bg-top)', padding: '40px 60px', textAlign: 'center' }}>
         <p style={{ fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--gold-light)', margin: '0 0 8px' }}>
           Sistema privado. Acesso restrito.
         </p>
