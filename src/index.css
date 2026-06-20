@@ -73,6 +73,27 @@ body {
 .betel-btn-nav  { padding: 14px 28px; }
 .betel-btn-hero { padding: 18px 40px; }
 
+/* ── Hero keyframes ────────────────────────────────────────── */
+@keyframes letterReveal {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes lineExpand {
+  from { width: 0; }
+  to   { width: 48px; }
+}
+
 /* ── Scroll indicator ──────────────────────────────────────── */
 @keyframes betel-scroll-bounce {
   0%, 100% { transform: translateY(0); }
@@ -83,12 +104,44 @@ body {
   display: block;
 }
 
-/* ── Pilares card hover ────────────────────────────────────── */
-.pilar-card { position: relative; overflow: hidden; cursor: default; }
-
-.pilar-card .pilar-name {
-  transition: opacity 200ms;
+/* ── Stagger reveal (IntersectionObserver) ─────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
 }
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.12s; }
+.reveal-delay-2 { transition-delay: 0.24s; }
+.reveal-delay-3 { transition-delay: 0.36s; }
+.reveal-delay-4 { transition-delay: 0.48s; }
+
+/* ── Privacidade lateral ───────────────────────────────────── */
+.reveal-lateral-item {
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-lateral-item.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── Pilares card hover ────────────────────────────────────── */
+.pilar-card {
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.pilar-card:hover {
+  box-shadow: 0 8px 32px rgba(184, 134, 11, 0.15);
+  transform: translateY(-4px);
+}
+.pilar-card .pilar-name { transition: opacity 200ms; }
 .pilar-card .pilar-desc {
   position: absolute;
   inset: 0;
@@ -103,8 +156,16 @@ body {
 .pilar-card:hover .pilar-desc { opacity: 1; }
 
 /* ── Agentes card hover ────────────────────────────────────── */
-.agent-card { position: relative; overflow: hidden; cursor: default; }
-
+.agent-card {
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.agent-card:hover {
+  box-shadow: 0 8px 32px rgba(184, 134, 11, 0.15);
+  transform: translateY(-4px);
+}
 .agent-card .agent-content {
   transition: opacity 200ms;
   width: 100%;
@@ -126,13 +187,16 @@ body {
 .agent-card:hover .agent-content { opacity: 0; }
 .agent-card:hover .agent-desc    { opacity: 1; }
 
-/* ── Fade-in por scroll (IntersectionObserver) ─────────────── */
-.fade-section {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+/* ── Governança card hover ─────────────────────────────────── */
+.govern-card {
+  transition: box-shadow 0.3s, transform 0.3s;
 }
-.fade-section.is-visible {
-  opacity: 1;
-  transform: translateY(0);
+.govern-card:hover {
+  box-shadow: 0 8px 32px rgba(184, 134, 11, 0.15);
+  transform: translateY(-4px);
+}
+
+/* ── prefers-reduced-motion ────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-lateral-item { transition: none; }
 }

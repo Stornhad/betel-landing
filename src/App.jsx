@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -7,7 +7,7 @@ gsap.registerPlugin(ScrollTrigger)
 
 /* ── Estilos reutilizáveis ───────────────────────────────────── */
 const SECTION = {
-  padding: '120px 60px',
+  padding: '80px 60px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -33,8 +33,8 @@ const HEADLINE = {
 }
 
 /* ── Componentes internos ────────────────────────────────────── */
-const SectionDivider = () => (
-  <div style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.6, margin: '0 auto 28px' }} />
+const SectionDivider = ({ className = '' }) => (
+  <div className={className} style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.6, margin: '0 auto 28px' }} />
 )
 
 const PILLARS = [
@@ -72,49 +72,70 @@ const AGENTS = [
 ]
 
 const GOVERN_CARDS = [
-  {
-    agent: 'ISAÍAS',
-    action: 'Avalia o mérito',
-    detail: 'Análise independente da tese. Sem autoridade sobre capital.',
-  },
-  {
-    agent: 'JOSÉ',
-    action: 'Decide e veta',
-    detail: 'Autoridade sobre capital. Veto registrado com fundamento.',
-  },
-  {
-    agent: 'SISTEMA',
-    action: 'Registra com data',
-    detail: 'Fundamento permanente. Rastreabilidade que não pode ser apagada.',
-  },
+  { agent: 'ISAÍAS', action: 'Avalia o mérito',   detail: 'Análise independente da tese. Sem autoridade sobre capital.' },
+  { agent: 'JOSÉ',   action: 'Decide e veta',      detail: 'Autoridade sobre capital. Veto registrado com fundamento.' },
+  { agent: 'SISTEMA',action: 'Registra com data',  detail: 'Fundamento permanente. Rastreabilidade que não pode ser apagada.' },
+]
+
+const PRIVACY_PHRASES = [
+  'Nenhuma corretora tem acesso.',
+  'Nenhum anúncio usa o que é seu.',
+  'Nenhum algoritmo de terceiro aprende com suas decisões.',
 ]
 
 /* ── App ─────────────────────────────────────────────────────── */
 export default function App() {
+  const scrollLineRef = useRef(null)
 
   useEffect(() => {
-    const sections = document.querySelectorAll('.fade-section')
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    // prefers-reduced-motion: tornar todas visíveis imediatamente
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      sections.forEach(el => el.classList.add('is-visible'))
-      return
+    // Linha de progresso de scroll
+    const scrollLine = scrollLineRef.current
+    const handleScroll = () => {
+      if (!scrollLine) return
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      scrollLine.style.height = max > 0 ? (window.scrollY / max * 100) + 'vh' : '0'
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    if (prefersReduced) {
+      document.querySelectorAll('.reveal, .reveal-lateral-item').forEach(el => el.classList.add('visible'))
+      return () => window.removeEventListener('scroll', handleScroll)
     }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible')
-            observer.unobserve(entry.target)
-          }
-        })
-      },
+    // Stagger reveal geral
+    const revealObserver = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target) }
+      }),
       { threshold: 0.15 }
     )
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el))
 
-    sections.forEach(el => observer.observe(el))
-    return () => observer.disconnect()
+    // Privacidade: stagger lateral com setTimeout
+    let lateralObserver = null
+    const lateralContainer = document.querySelector('.reveal-lateral-container')
+    if (lateralContainer) {
+      lateralObserver = new IntersectionObserver(
+        entries => entries.forEach(e => {
+          if (e.isIntersecting) {
+            Array.from(e.target.querySelectorAll('.reveal-lateral-item')).forEach((item, i) => {
+              setTimeout(() => item.classList.add('visible'), i * 400)
+            })
+            lateralObserver.unobserve(e.target)
+          }
+        }),
+        { threshold: 0.3 }
+      )
+      lateralObserver.observe(lateralContainer)
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      revealObserver.disconnect()
+      lateralObserver?.disconnect()
+    }
   }, [])
 
   return (
@@ -131,21 +152,59 @@ export default function App() {
         <rect width="100%" height="100%" filter="url(#betel-noise)" />
       </svg>
 
+      {/* Linha de progresso vertical */}
+      <div
+        ref={scrollLineRef}
+        style={{
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          width: 3,
+          height: 0,
+          background: 'linear-gradient(to bottom, transparent, var(--gold-primary), transparent)',
+          zIndex: 99,
+          pointerEvents: 'none',
+        }}
+      />
+
       {/* ── 0: NAV ─────────────────────────────────────────────── */}
       <header style={{ borderBottom: '1px solid var(--card-border)', background: 'var(--cream-base)' }}>
         <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 60px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '20px', color: 'var(--gold-primary)', letterSpacing: '4px', textTransform: 'uppercase' }}>
+          <span
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 400,
+              fontSize: '20px',
+              color: 'var(--gold-primary)',
+              letterSpacing: '4px',
+              textTransform: 'uppercase',
+              opacity: 0,
+              animation: 'fadeIn 1s 0.5s forwards',
+            }}
+          >
             BETEL
           </span>
-          <a href="https://betel-patrimonio.vercel.app" className="betel-btn betel-btn-nav">
+          <a
+            href="https://betel-patrimonio.vercel.app"
+            className="betel-btn betel-btn-nav"
+            style={{ opacity: 0, animation: 'fadeIn 1s 0.7s forwards' }}
+          >
             Acessar
           </a>
         </div>
       </header>
 
-      {/* ── 1: HERO — sem fade, visível imediatamente ──────────── */}
-      <section style={{ ...SECTION, padding: '140px 60px 100px', background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))' }}>
-        <p style={LABEL}>Sistema privado de governança patrimonial</p>
+      {/* ── 1: HERO ────────────────────────────────────────────── */}
+      <section style={{
+        ...SECTION,
+        padding: '140px 60px 100px',
+        minHeight: '100vh',
+        background: 'linear-gradient(to bottom, var(--cream-base), var(--cream-warm))',
+        justifyContent: 'center',
+      }}>
+        <p style={{ ...LABEL, opacity: 0, animation: 'slideUp 0.8s 0.3s forwards' }}>
+          Sistema privado de governança patrimonial
+        </p>
 
         <h1 style={{
           fontFamily: 'var(--font-display)',
@@ -156,10 +215,28 @@ export default function App() {
           margin: '0 0 24px',
           lineHeight: 1,
         }}>
-          BETEL
+          {'BETEL'.split('').map((letter, i) => (
+            <span
+              key={i}
+              style={{
+                display: 'inline-block',
+                opacity: 0,
+                animation: `letterReveal 0.6s ${0.6 + i * 0.12}s forwards`,
+              }}
+            >
+              {letter}
+            </span>
+          ))}
         </h1>
 
-        <div style={{ width: 48, height: 1, background: 'var(--gold-primary)', opacity: 0.5, margin: '0 auto 24px' }} />
+        <div style={{
+          width: 0,
+          height: 1,
+          background: 'var(--gold-primary)',
+          opacity: 0.5,
+          margin: '0 auto 24px',
+          animation: 'lineExpand 0.8s 1.3s forwards',
+        }} />
 
         <p style={{
           fontFamily: 'var(--font-display)',
@@ -167,34 +244,31 @@ export default function App() {
           fontSize: '19px',
           color: 'var(--text-secondary)',
           margin: '0 0 36px',
+          opacity: 0,
+          animation: 'fadeIn 1s 1.6s forwards',
         }}>
           Seu patrimônio. Seus agentes. Suas decisões, documentadas.
         </p>
 
-        <a href="https://betel-patrimonio.vercel.app" className="betel-btn betel-btn-hero">
+        <a
+          href="https://betel-patrimonio.vercel.app"
+          className="betel-btn betel-btn-hero"
+          style={{ opacity: 0, animation: 'slideUp 0.8s 1.9s forwards' }}
+        >
           Acessar Patrimônio
         </a>
-
-        <div style={{ marginTop: 44, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--gold-primary)' }}>
-            scroll
-          </span>
-          <span className="betel-scroll-arrow" style={{ color: 'var(--gold-primary)', fontSize: '16px', lineHeight: 1 }}>
-            ↓
-          </span>
-        </div>
       </section>
 
       {/* ── 2: O QUE É ─────────────────────────────────────────── */}
-      <section className="fade-section" style={{ ...SECTION, background: '#FFFFFF' }}>
-        <SectionDivider />
-        <p style={LABEL}>O que é</p>
+      <section style={{ ...SECTION, background: '#FFFFFF' }}>
+        <SectionDivider className="reveal" />
+        <p className="reveal reveal-delay-1" style={LABEL}>O que é</p>
 
-        <h2 style={{ ...HEADLINE, fontSize: '46px', maxWidth: 640 }}>
+        <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, fontSize: '46px', maxWidth: 640 }}>
           Uma categoria que não existia.
         </h2>
 
-        <div style={{ maxWidth: 600, textAlign: 'left' }}>
+        <div className="reveal reveal-delay-3" style={{ maxWidth: 600, textAlign: 'left' }}>
           <p style={{ fontWeight: 400, fontSize: '16px', lineHeight: 1.85, color: 'var(--text-secondary)', marginBottom: '20px' }}>
             Apps de gestão patrimonial mostram o que aconteceu.<br />
             O BETEL participa do que vai acontecer.
@@ -206,18 +280,22 @@ export default function App() {
       </section>
 
       {/* ── 3: GOVERNANÇA ──────────────────────────────────────── */}
-      <section className="fade-section" style={{ ...SECTION, background: 'var(--cream-warm)' }}>
-        <SectionDivider />
-        <p style={LABEL}>Governança</p>
+      <section style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+        <SectionDivider className="reveal" />
+        <p className="reveal reveal-delay-1" style={LABEL}>Governança</p>
 
-        <h2 style={{ ...HEADLINE, maxWidth: 560 }}>
+        <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, maxWidth: 560 }}>
           Do insight à alocação, com rastreabilidade completa.
         </h2>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 760 }}>
+        <div className="reveal reveal-delay-3" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 760 }}>
           {GOVERN_CARDS.flatMap((c, i) => {
             const card = (
-              <div key={c.agent} style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: 8, padding: '22px 14px', minWidth: 190, flex: '1 1 190px', maxWidth: 220 }}>
+              <div
+                key={c.agent}
+                className="govern-card"
+                style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: 8, padding: '22px 14px', minWidth: 190, flex: '1 1 190px', maxWidth: 220 }}
+              >
                 <p style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '15px', color: 'var(--gold-primary)', margin: '0 0 6px' }}>
                   {c.agent}
                 </p>
@@ -238,21 +316,21 @@ export default function App() {
       </section>
 
       {/* ── 4: OS QUATRO PILARES ───────────────────────────────── */}
-      <section className="fade-section" style={{ ...SECTION, background: '#FFFFFF' }}>
-        <SectionDivider />
-        <p style={LABEL}>Os quatro pilares</p>
+      <section style={{ ...SECTION, background: '#FFFFFF' }}>
+        <SectionDivider className="reveal" />
+        <p className="reveal reveal-delay-1" style={LABEL}>Os quatro pilares</p>
 
-        <h2 style={HEADLINE}>
+        <h2 className="reveal reveal-delay-2" style={HEADLINE}>
           Construído sobre fundações.
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, maxWidth: 860, width: '100%' }}>
-          {PILLARS.map((p) => {
+          {PILLARS.map((p, idx) => {
             const isPrimary = p.name === 'Casa' || p.name === 'Altar'
             return (
               <div
                 key={p.name}
-                className="pilar-card"
+                className={`pilar-card reveal reveal-delay-${idx + 1}`}
                 style={{
                   background: '#FFFFFF',
                   border: '1px solid var(--card-border)',
@@ -281,19 +359,19 @@ export default function App() {
       </section>
 
       {/* ── 5: OS AGENTES ──────────────────────────────────────── */}
-      <section className="fade-section" style={{ ...SECTION, background: 'var(--cream-warm)' }}>
-        <SectionDivider />
-        <p style={LABEL}>Os agentes</p>
+      <section style={{ ...SECTION, background: 'var(--cream-warm)' }}>
+        <SectionDivider className="reveal" />
+        <p className="reveal reveal-delay-1" style={LABEL}>Os agentes</p>
 
-        <h2 style={HEADLINE}>
+        <h2 className="reveal reveal-delay-2" style={HEADLINE}>
           Cada domínio tem um responsável.
         </h2>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, maxWidth: 540, width: '100%' }}>
-          {AGENTS.map((a) => (
+          {AGENTS.map((a, idx) => (
             <div
               key={a.name}
-              className="agent-card"
+              className={`agent-card reveal reveal-delay-${idx + 1}`}
               style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: 8, padding: 22, minHeight: 84 }}
             >
               <div className="agent-content">
@@ -324,32 +402,28 @@ export default function App() {
       </section>
 
       {/* ── 6: PRIVACIDADE ─────────────────────────────────────── */}
-      <section className="fade-section" style={{ ...SECTION, background: '#FFFFFF' }}>
-        <SectionDivider />
-        <p style={LABEL}>Privacidade</p>
+      <section style={{ ...SECTION, background: '#FFFFFF' }}>
+        <SectionDivider className="reveal" />
+        <p className="reveal reveal-delay-1" style={LABEL}>Privacidade</p>
 
-        <h2 style={{ ...HEADLINE, maxWidth: 560 }}>
+        <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, maxWidth: 560 }}>
           Seus dados não alimentam nenhum produto.
         </h2>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
-          {[
-            'Nenhuma corretora tem acesso.',
-            'Nenhum anúncio usa o que é seu.',
-            'Nenhum algoritmo de terceiro aprende com suas decisões.',
-          ].map((s) => (
-            <p key={s} style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '21px', color: 'var(--text-secondary)', margin: 0 }}>
+        <div className="reveal-lateral-container" style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+          {PRIVACY_PHRASES.map((s) => (
+            <p key={s} className="reveal-lateral-item" style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '21px', color: 'var(--text-secondary)', margin: 0 }}>
               {s}
             </p>
           ))}
         </div>
 
-        <p style={{ fontWeight: 400, fontSize: '16px', color: 'var(--text-secondary)', maxWidth: 480, margin: 0 }}>
+        <p className="reveal reveal-delay-3" style={{ fontWeight: 400, fontSize: '16px', color: 'var(--text-secondary)', maxWidth: 480, margin: 0 }}>
           O BETEL roda na sua infraestrutura, com suas credenciais, sob suas regras.
         </p>
       </section>
 
-      {/* ── FOOTER — sem fade, sempre visível ──────────────────── */}
+      {/* ── FOOTER ─────────────────────────────────────────────── */}
       <footer style={{ background: 'var(--text-primary)', padding: '40px 60px', textAlign: 'center' }}>
         <p style={{ fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', color: 'var(--gold-light)', margin: '0 0 8px' }}>
           Sistema privado. Acesso restrito.
