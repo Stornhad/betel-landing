@@ -55,19 +55,23 @@ export default function ThreeBackground({ scrollProgressRef }) {
     }
 
     // ── CUBO DE METATRON ─────────────────────────────────────
-    const R1 = 1.15   // hexágono interno
-    const R2 = 2.30   // hexágono externo (rotacionado 30°)
+    // Construção correta a partir do Fruto da Vida: 13 centros — 1 central,
+    // 6 no anel interno a distância R, 6 no anel externo a distância 2R NA
+    // MESMA direção angular (sem rotação entre anéis). Todos os pares conectados.
+
+    // --- Esqueleto 2D (elemento sutil de fundo) ---
+    const R = 1.4
     const metatronPoints = [new THREE.Vector3(0, 0, 0)]
 
-    // Hexágono interno — leve projeção em Z para profundidade
+    // Anel interno: 6 pontos a distância R
     for (let i = 0; i < 6; i++) {
       const angle = (Math.PI / 3) * i - Math.PI / 2
-      metatronPoints.push(new THREE.Vector3(R1 * Math.cos(angle), R1 * Math.sin(angle), 0.18))
+      metatronPoints.push(new THREE.Vector3(R * Math.cos(angle), R * Math.sin(angle), 0))
     }
-    // Hexágono externo — rotacionado 30°, projetado mais ao fundo
+    // Anel externo: 6 pontos a distância 2R, mesma direção angular (sem offset)
     for (let i = 0; i < 6; i++) {
-      const angle = (Math.PI / 3) * i - Math.PI / 2 + Math.PI / 6
-      metatronPoints.push(new THREE.Vector3(R2 * Math.cos(angle), R2 * Math.sin(angle), -0.18))
+      const angle = (Math.PI / 3) * i - Math.PI / 2
+      metatronPoints.push(new THREE.Vector3(2 * R * Math.cos(angle), 2 * R * Math.sin(angle), 0))
     }
 
     // Arestas: todos os 78 pares (13 × 12 / 2)
@@ -84,27 +88,43 @@ export default function ThreeBackground({ scrollProgressRef }) {
     const metatronEdges = new THREE.LineSegments(edgeGeo, edgeMat)
     disposables.push(edgeGeo, edgeMat)
 
-    // Vértices (12 externos) + centro maior, separados
+    // Vértices (13 pontos)
     const vertGeo = new THREE.BufferGeometry()
-    const vertArr = new Float32Array((metatronPoints.length - 1) * 3)
-    for (let i = 1; i < metatronPoints.length; i++) {
-      vertArr[(i - 1) * 3]     = metatronPoints[i].x
-      vertArr[(i - 1) * 3 + 1] = metatronPoints[i].y
-      vertArr[(i - 1) * 3 + 2] = metatronPoints[i].z
+    const vertArr = new Float32Array(metatronPoints.length * 3)
+    for (let i = 0; i < metatronPoints.length; i++) {
+      vertArr[i * 3]     = metatronPoints[i].x
+      vertArr[i * 3 + 1] = metatronPoints[i].y
+      vertArr[i * 3 + 2] = metatronPoints[i].z
     }
     vertGeo.setAttribute('position', new THREE.BufferAttribute(vertArr, 3))
-    const vertMat = new THREE.PointsMaterial({ color: 0xE8D9A0, size: 0.09, transparent: true, opacity: 0.6, sizeAttenuation: true, depthWrite: false })
+    const vertMat = new THREE.PointsMaterial({ color: 0xE8D9A0, size: 0.08, transparent: true, opacity: 0.5, sizeAttenuation: true, depthWrite: false })
     const metatronVerts = new THREE.Points(vertGeo, vertMat)
     disposables.push(vertGeo, vertMat)
 
-    const centerGeo = new THREE.BufferGeometry()
-    centerGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3))
-    const centerMat = new THREE.PointsMaterial({ color: 0xE8D9A0, size: 0.2, transparent: true, opacity: 0.7, sizeAttenuation: true, depthWrite: false })
-    const metatronCenter = new THREE.Points(centerGeo, centerMat)
-    disposables.push(centerGeo, centerMat)
+    // Esqueleto plano: rotaciona livremente (é 2D, achatar é esperado)
+    const skeletonGroup = new THREE.Group()
+    skeletonGroup.add(metatronEdges, metatronVerts)
+
+    // --- Cubo 3D real (elemento de presença com volume verdadeiro) ---
+    // Sólido platônico que emerge da estrutura; BoxGeometry real, não simulação 2D.
+    // Suposição de material (spec truncado em "color:"): faces translúcidas em
+    // dourado primário + arestas luminosas em dourado claro, sutis, sem virar logo.
+    const CUBE_SIZE = 1.5
+    const cubeGeo = new THREE.BoxGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)
+    const cubeMat = new THREE.MeshBasicMaterial({ color: 0xB8860B, transparent: true, opacity: 0.09, depthWrite: false })
+    const cubeMesh = new THREE.Mesh(cubeGeo, cubeMat)
+    disposables.push(cubeGeo, cubeMat)
+
+    const cubeEdgeGeo = new THREE.EdgesGeometry(cubeGeo)
+    const cubeEdgeMat = new THREE.LineBasicMaterial({ color: 0xE8D9A0, transparent: true, opacity: 0.35 })
+    const cubeEdges = new THREE.LineSegments(cubeEdgeGeo, cubeEdgeMat)
+    disposables.push(cubeEdgeGeo, cubeEdgeMat)
+
+    const cubeGroup = new THREE.Group()
+    cubeGroup.add(cubeMesh, cubeEdges)
 
     const metatronGroup = new THREE.Group()
-    metatronGroup.add(metatronEdges, metatronVerts, metatronCenter)
+    metatronGroup.add(skeletonGroup, cubeGroup)
     scene.add(metatronGroup)
 
     // ── ESPIRAL DE FIBONACCI ─────────────────────────────────
@@ -176,9 +196,12 @@ export default function ThreeBackground({ scrollProgressRef }) {
       // Luz: pico na governança, suaviza na privacidade
       keyLight.intensity = 0.7 + Math.sin(p * Math.PI) * 1.3
 
-      // ── Metatron: rotação contínua lenta em múltiplos eixos ──
-      metatronGroup.rotation.x += 0.0003
-      metatronGroup.rotation.y += 0.0005
+      // ── Metatron ─────────────────────────────────────────────
+      // Esqueleto 2D: spin plano lento (achatar é esperado, é uma malha plana)
+      skeletonGroup.rotation.z += 0.0006
+      // Cubo 3D: tumble multi-eixo real — revela volume, não achata
+      cubeGroup.rotation.x += 0.0024
+      cubeGroup.rotation.y += 0.0031
 
       // Comportamento por seção (offset à frente da câmera, opacity, escala, centralização)
       const mOffset  = piecewise(p, [[0, 18], [0.17, 8], [0.33, 12], [0.7, 12], [0.85, 5], [1, 4]])
@@ -187,9 +210,10 @@ export default function ThreeBackground({ scrollProgressRef }) {
       const mX       = piecewise(p, [[0, -1.8], [0.3, -1.8], [0.85, 0], [1, 0]])
       metatronGroup.position.set(mX, 0.5, currentZ - mOffset)
       metatronGroup.scale.setScalar(mScale)
-      edgeMat.opacity = mOpacity
-      vertMat.opacity = mOpacity * 4    // pontos um pouco mais presentes que as linhas
-      centerMat.opacity = Math.min(0.7, mOpacity * 5)
+      edgeMat.opacity = mOpacity * 0.9                          // esqueleto: linhas sutis
+      vertMat.opacity = Math.min(0.5, mOpacity * 3.2)           // pontos do esqueleto
+      cubeMat.opacity = mOpacity * 0.6                          // faces translúcidas do cubo
+      cubeEdgeMat.opacity = Math.min(0.4, mOpacity * 2.2)       // arestas luminosas do cubo
 
       // ── Espiral: acompanha a câmera; visível no pico da governança ──
       spiralGroup.position.z = currentZ - 14
