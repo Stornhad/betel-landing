@@ -41,7 +41,7 @@ const PILLARS = [
 const AGENTS = [
   { name: 'JOSÉ',    icon: 'ti ti-wheat',  role: 'Provisão e Legado',       desc: 'Governança patrimonial. Autoridade sobre capital, alocação e veto com fundamento registrado.' },
   { name: 'ISAÍAS',  icon: 'ti ti-flame',  role: 'Análise de Teses',        desc: 'Avaliação de mérito independente. Sem autoridade sobre capital. Fundamento e contexto em cada análise.' },
-  { name: 'DANIEL',  icon: 'ti ti-crown',  role: 'Trading Quantitativo',    desc: 'Análise quantitativa e discernimento de mercado. Golden Elephant Project, XAUUSD M2.' },
+  { name: 'DANIEL',  icon: 'ti ti-crown',  role: 'Trading Quantitativo',    desc: 'Análise quantitativa e discernimento de mercado. Construção de estratégias sistemáticas.' },
   { name: 'BEZALEL', icon: 'ti ti-hammer', role: 'Construção Técnica',      desc: 'Desenvolvimento e infraestrutura de todos os projetos digitais do ecossistema BETEL.' },
 ]
 
@@ -225,7 +225,7 @@ export default function App() {
         <h2 className="reveal reveal-delay-2" style={{ ...HEADLINE, maxWidth: 560 }}>
           Do insight à alocação, com rastreabilidade completa.
         </h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 760 }}>
+        <div className="govern-container" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 760 }}>
           {GOVERN_CARDS.flatMap((c, i) => {
             const card = (
               <div key={c.agent} className={`glass-card ${c.dir}`} style={{ padding: '22px 14px', minWidth: 190, flex: '1 1 190px', maxWidth: 220 }}>
@@ -235,7 +235,7 @@ export default function App() {
               </div>
             )
             const arrow = i < GOVERN_CARDS.length - 1
-              ? <span key={`arrow-${i}`} className="reveal reveal-delay-3" style={{ color: 'var(--gold-primary)', fontSize: '15px', flexShrink: 0 }}>→</span>
+              ? <span key={`arrow-${i}`} className="reveal reveal-delay-3 govern-arrow" style={{ color: 'var(--gold-primary)', fontSize: '15px', flexShrink: 0 }}>→</span>
               : null
             return arrow ? [card, arrow] : [card]
           })}
@@ -247,7 +247,7 @@ export default function App() {
         <SectionDivider className="reveal" />
         <p className="reveal reveal-delay-1" style={LABEL}>Os quatro pilares</p>
         <h2 className="reveal reveal-delay-2" style={HEADLINE}>Construído sobre fundações.</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, maxWidth: 860, width: '100%' }}>
+        <div className="pilar-grid" style={{ display: 'grid', gap: 14, maxWidth: 860, width: '100%' }}>
           {PILLARS.map((p, idx) => {
             const isPrimary = p.name === 'Casa' || p.name === 'Altar'
             return (

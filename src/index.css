@@ -176,6 +176,28 @@ body {
 .agent-card:hover .agent-content { opacity: 0; }
 .agent-card:hover .agent-desc    { opacity: 1; }
 
+/* ── Pilares — grid responsivo ─────────────────────────────── */
+.pilar-grid { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 600px) {
+  .pilar-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── Governança — mobile: coluna vertical, setas ocultas ───── */
+@media (max-width: 600px) {
+  .govern-container {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .govern-container .glass-card {
+    min-width: 0 !important;
+    max-width: 340px !important;
+    flex: 0 0 auto !important;
+    width: 100%;
+  }
+  .govern-arrow { display: none; }
+}
+
 /* ── prefers-reduced-motion ────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .scene .reveal, .scene .from-left, .scene .from-bottom,
