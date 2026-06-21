@@ -125,11 +125,13 @@ export default function App() {
   return (
     <div style={{ position: 'relative', overflowX: 'hidden' }}>
 
-      {/* Cena 3D (apenas modo imersivo, carregada de forma assíncrona) */}
-      {immersive && (
+      {/* Cena 3D (desktop) ou gradiente CSS (mobile / reduced-motion) */}
+      {immersive ? (
         <Suspense fallback={null}>
           <ThreeBackground scrollProgressRef={scrollProgressRef} />
         </Suspense>
+      ) : (
+        <div className="mobile-bg" aria-hidden="true" />
       )}
 
       {/* Linha de progresso vertical */}

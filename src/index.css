@@ -198,9 +198,32 @@ body {
   .govern-arrow { display: none; }
 }
 
+/* ── Fallback mobile — gradiente CSS pulsante ──────────────── */
+.mobile-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 40%,
+      rgba(184,134,11,0.09) 0%,
+      rgba(107,90,46,0.05) 45%,
+      transparent 72%),
+    radial-gradient(ellipse 40% 30% at 30% 80%,
+      rgba(184,134,11,0.04) 0%,
+      transparent 60%);
+  animation: mobileBgPulse 7s ease-in-out infinite;
+}
+
+@keyframes mobileBgPulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.06); }
+}
+
 /* ── prefers-reduced-motion ────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .scene .reveal, .scene .from-left, .scene .from-bottom,
   .scene .from-right, .scene .reveal-lateral { transition: none; }
   .betel-scroll-arrow { animation: none; }
+  .mobile-bg { animation: none; opacity: 0.75; }
 }
