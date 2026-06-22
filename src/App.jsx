@@ -202,6 +202,87 @@ export default function App() {
         </div>
       </section>
 
+      {/* ── LEGADO — Por que BETEL ─────────────────────────────── */}
+      <section data-pin className="scene" style={sectionBase}>
+        <SectionDivider className="reveal" />
+
+        <h2
+          className="reveal reveal-delay-1"
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontStyle: 'italic',
+            fontWeight: 400,
+            fontSize: 'clamp(26px, 4vw, 36px)',
+            color: '#E8D9A0',
+            margin: '0 0 40px',
+            lineHeight: 1.3,
+            maxWidth: 600,
+            textAlign: 'center',
+          }}
+        >
+          "Se algo mudar amanhã, sua família sabe o que fazer com o que você construiu até hoje?"
+        </h2>
+
+        <div
+          className="reveal reveal-delay-2"
+          style={{ maxWidth: 560, textAlign: 'center', fontFamily: 'var(--font-body)' }}
+        >
+          <p style={{ fontWeight: 300, fontSize: '15px', lineHeight: 1.85, color: 'rgba(232,217,160,0.65)', marginBottom: 20 }}>
+            A maioria dos pais cuida bem. Trabalha, provê, planeja. Mas poucos têm clareza real sobre o próprio patrimônio —{' '}
+            <span style={{ color: 'rgba(232,217,160,0.90)' }}>
+              onde está, o que vence, o que protege, o que vai durar além deles.
+            </span>
+          </p>
+          <p style={{ fontWeight: 300, fontSize: '15px', lineHeight: 1.85, color: 'rgba(232,217,160,0.65)', marginBottom: 20 }}>
+            Não por negligência. Por falta de um sistema que pense junto.
+          </p>
+          <p style={{ fontWeight: 300, fontSize: '15px', lineHeight: 1.85, color: 'rgba(232,217,160,0.65)', marginBottom: 40 }}>
+            BETEL é esse sistema. Um ecossistema de agentes com escopo e autoridade definidos, construído sobre quatro pilares: o que você vive, o que você crê, o que você constrói e o que você deixa.
+          </p>
+        </div>
+
+        <div
+          className="reveal reveal-delay-3"
+          style={{
+            maxWidth: 480,
+            textAlign: 'left',
+            borderLeft: '2px solid rgba(184,134,11,0.40)',
+            paddingLeft: 24,
+            margin: '0 auto 40px',
+          }}
+        >
+          <p
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontStyle: 'italic',
+              fontWeight: 400,
+              fontSize: '18px',
+              color: '#E8D9A0',
+              lineHeight: 1.7,
+              margin: '0 0 14px',
+            }}
+          >
+            <span style={{ display: 'block' }}>"Fidelidade no pouco antecede autoridade no muito.</span>
+            <span style={{ display: 'block' }}>Gestão do presente determina o futuro."</span>
+          </p>
+          <p
+            style={{
+              fontSize: '10px',
+              fontWeight: 600,
+              letterSpacing: '2px',
+              textTransform: 'uppercase',
+              color: 'var(--gold-primary)',
+              opacity: 0.6,
+              margin: 0,
+            }}
+          >
+            Lucas 16:10
+          </p>
+        </div>
+
+        <SectionDivider className="reveal reveal-delay-4" />
+      </section>
+
       {/* ── 2: O QUE É ─────────────────────────────────────────── */}
       <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
