@@ -355,6 +355,62 @@ export default function App() {
         </div>
       </section>
 
+      {/* ── GALERIA — O sistema por dentro ────────────────────── */}
+      <section data-pin className="scene" style={sectionBase}>
+        <SectionDivider className="reveal" />
+        <h2 className="reveal reveal-delay-1" style={{ ...HEADLINE, fontSize: '38px', margin: '0 0 32px' }}>
+          O sistema por dentro
+        </h2>
+
+        <div className="screenshot-grid reveal reveal-delay-2" style={{ display: 'grid', gap: 20, maxWidth: 1040, width: '100%' }}>
+          {[
+            { file: 'dashboard',  caption: 'Visão completa do patrimônio em tempo real' },
+            { file: 'patrimonio', caption: 'Alocação por categoria com cotação ao vivo' },
+            { file: 'metas',      caption: 'Metas de longo prazo por pilar e horizonte temporal' },
+          ].map(({ file, caption }) => (
+            <div key={file} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {/* Frame de browser */}
+              <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(184,134,11,0.18)' }}>
+                <div style={{ background: '#1A1714', padding: '7px 10px', display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#FF5F57', flexShrink: 0 }} />
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#FEBC2E', flexShrink: 0 }} />
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#28C840', flexShrink: 0 }} />
+                  <div style={{
+                    flex: 1, background: 'rgba(255,255,255,0.06)', borderRadius: 3,
+                    padding: '2px 8px', fontSize: 9, color: 'rgba(232,217,160,0.35)',
+                    textAlign: 'center', marginLeft: 8, letterSpacing: '0.3px',
+                    fontFamily: 'var(--font-body)', whiteSpace: 'nowrap',
+                    overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    betel-patrimonio.vercel.app
+                  </div>
+                </div>
+                <img
+                  src={`/screenshots/${file}.png`}
+                  alt={file}
+                  loading="lazy"
+                  style={{
+                    display: 'block', width: '100%',
+                    maxHeight: 'clamp(160px, 36vh, 380px)',
+                    objectFit: 'cover', objectPosition: 'top',
+                  }}
+                />
+              </div>
+              {/* Legenda */}
+              <p style={{
+                margin: 0, fontWeight: 300, fontSize: '12px', lineHeight: 1.5,
+                color: 'rgba(184,134,11,0.65)', textAlign: 'center',
+                fontFamily: 'var(--font-body)',
+              }}>
+                {caption}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <SectionDivider className="reveal reveal-delay-3" />
+      </section>
+
       {/* ── 5: OS AGENTES ──────────────────────────────────────── */}
       <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
