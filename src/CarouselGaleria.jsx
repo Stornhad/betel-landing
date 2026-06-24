@@ -7,145 +7,159 @@ const SLIDES = [
   { name: 'Vencimentos', file: 'Vencimentos.png' },
 ]
 const N        = SLIDES.length
-const CYCLE_MS = 5000
-const W        = 520
-const H        = 335
-const X_STEP   = 320
+const W        = 480
+const H        = 310
+const X_STEP   = 340
+const DRAG_DIV = 380
 
 function lerp(a, b, t) { return a + (b - a) * t }
 
-function slotStyle(slot) {
-  const abs = Math.abs(slot)
-  if (abs >= 2) return { opacity: '0', pointerEvents: 'none' }
+function cardStyle(offset, mobile) {
+  const abs = Math.abs(offset)
 
-  let scale, opacity, brightness
-  if (abs <= 1) {
-    scale      = lerp(1,    0.72, abs)
-    opacity    = lerp(1,    0.65, abs)
-    brightness = lerp(1,    0.75, abs)
-  } else {
-    const t    = abs - 1
-    scale      = lerp(0.72, 0.55, t)
-    opacity    = lerp(0.65, 0,    t)
-    brightness = lerp(0.75, 0.5,  t)
-  }
+  if (mobile && abs > 0.7) return { opacity: '0', pointerEvents: 'none' }
+  if (!mobile && abs >= 2)  return { opacity: '0', pointerEvents: 'none' }
 
-  const x    = slot * X_STEP
-  const rotY = -slot * 12
-  const shadow = abs < 0.5
-    ? '0 28px 72px rgba(0,0,0,0.65), 0 0 0 1px rgba(184,134,11,0.25)'
-    : '0 12px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(184,134,11,0.08)'
+  const scale      = abs <= 1 ? lerp(1, 0.72, abs) : lerp(0.72, 0.5, abs - 1)
+  const brightness = abs <= 1 ? lerp(1, 0.5,  abs) : lerp(0.5,  0.2, abs - 1)
+  const fade       = abs >= 1.8 ? lerp(1, 0, (abs - 1.8) / 0.2) : 1
+  const x          = offset * X_STEP
+  const rotY       = mobile ? 0 : offset * 18
+  const shadow     = abs < 0.3 ? '0 8px 40px rgba(185,134,11,0.25)' : 'none'
+  const prefix     = mobile ? '' : 'perspective(900px) '
 
   return {
-    opacity:       String(opacity),
-    transform:     `perspective(900px) translateX(${x}px) rotateY(${rotY}deg) scale(${scale})`,
+    transform:     `${prefix}translateX(${x}px) rotateY(${rotY}deg) scale(${scale})`,
     filter:        `brightness(${brightness})`,
-    boxShadow:     shadow,
+    opacity:       String(fade),
     zIndex:        String(Math.round(10 - abs * 3)),
-    pointerEvents: 'auto',
+    boxShadow:     shadow,
+    pointerEvents: abs < 1.5 ? 'auto' : 'none',
   }
 }
 
 export default function CarouselGaleria() {
-  const sceneRef    = useRef(null)
-  const progressRef = useRef(0)
-  const runningRef  = useRef(false)
-  const rafRef      = useRef(null)
-  const lastTsRef   = useRef(null)
-  const backRafRef  = useRef(null)
-  const tickFnRef   = useRef(null)
+  const sceneRef  = useRef(null)
+  const dotsRef   = useRef(null)
+  const progress  = useRef(0)
+  const target    = useRef(0)
+  const dragging  = useRef(false)
+  const dragX0    = useRef(0)
+  const dragProg0 = useRef(0)
+  const rafRef    = useRef(null)
 
-  function applyFrame(progress) {
+  function applyFrame(prog) {
     if (!sceneRef.current) return
-    sceneRef.current.querySelectorAll('[data-tela]').forEach((el, i) => {
-      let slot = ((i - progress * N) % N + N) % N
-      if (slot > N / 2) slot -= N
-      Object.assign(el.style, slotStyle(slot))
+    const mobile = window.innerWidth < 768
+    sceneRef.current.querySelectorAll('[data-slide]').forEach((el, i) => {
+      let off = ((i - prog) % N + N) % N
+      if (off > N / 2) off -= N
+      Object.assign(el.style, cardStyle(off, mobile))
     })
-  }
-
-  tickFnRef.current = (ts) => {
-    if (!runningRef.current) return
-    if (lastTsRef.current === null) lastTsRef.current = ts
-    const dt = ts - lastTsRef.current
-    lastTsRef.current = ts
-    progressRef.current = (progressRef.current + dt / CYCLE_MS) % 1
-    applyFrame(progressRef.current)
-    rafRef.current = requestAnimationFrame(tickFnRef.current)
-  }
-
-  function startLoop() {
-    if (runningRef.current) return
-    runningRef.current = true
-    lastTsRef.current  = null
-    rafRef.current = requestAnimationFrame(ts => tickFnRef.current(ts))
-  }
-
-  function stopLoop() {
-    runningRef.current = false
-    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null }
-    lastTsRef.current = null
-  }
-
-  function handleBack() {
-    if (backRafRef.current) { cancelAnimationFrame(backRafRef.current); backRafRef.current = null }
-    const p0  = progressRef.current
-    const p1  = p0 - 0.12
-    const t0  = performance.now()
-    const dur = 400
-    function step(now) {
-      const t    = Math.min((now - t0) / dur, 1)
-      const ease = 1 - (1 - t) ** 3
-      progressRef.current = ((p0 + (p1 - p0) * ease) % 1 + 1) % 1
-      applyFrame(progressRef.current)
-      if (t < 1) backRafRef.current = requestAnimationFrame(step)
+    if (dotsRef.current) {
+      const active = ((Math.round(prog) % N) + N) % N
+      dotsRef.current.querySelectorAll('[data-dot]').forEach((dot, i) => {
+        dot.style.background = i === active ? '#C9A028' : 'rgba(185,134,11,0.3)'
+        dot.style.transform  = i === active ? 'scale(1.4)' : 'scale(1)'
+      })
     }
-    backRafRef.current = requestAnimationFrame(step)
   }
 
   useEffect(() => {
-    applyFrame(0)
-    return () => {
-      stopLoop()
-      if (backRafRef.current) cancelAnimationFrame(backRafRef.current)
+    function frame() {
+      // shortest-path lerp com wrap circular
+      let diff = target.current - progress.current
+      diff = ((diff % N) + N) % N
+      if (diff > N / 2) diff -= N
+      progress.current = ((progress.current + diff * 0.12) % N + N) % N
+      applyFrame(progress.current)
+      rafRef.current = requestAnimationFrame(frame)
     }
+    rafRef.current = requestAnimationFrame(frame)
+    return () => cancelAnimationFrame(rafRef.current)
   }, [])
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28, width: '100%' }}
-         onMouseEnter={startLoop}
-         onMouseLeave={stopLoop}>
+  function snap() {
+    target.current = ((Math.round(target.current) % N) + N) % N
+  }
 
-      {/* Desktop: cena 3D */}
-      <div ref={sceneRef} className="carousel-scene"
-           style={{ position: 'relative', height: 400, width: '100%', overflow: 'hidden' }}>
+  function onMouseDown(e) {
+    dragging.current  = true
+    dragX0.current    = e.clientX
+    dragProg0.current = target.current
+    e.preventDefault()
+  }
+  function onMouseMove(e) {
+    if (!dragging.current) return
+    target.current = dragProg0.current + (e.clientX - dragX0.current) / DRAG_DIV
+  }
+  function onMouseUp() {
+    if (dragging.current) { dragging.current = false; snap() }
+  }
+
+  function onTouchStart(e) {
+    dragging.current  = true
+    dragX0.current    = e.touches[0].clientX
+    dragProg0.current = target.current
+  }
+  function onTouchMove(e) {
+    if (!dragging.current) return
+    target.current = dragProg0.current + (e.touches[0].clientX - dragX0.current) / DRAG_DIV
+    e.preventDefault()
+  }
+  function onTouchEnd() {
+    if (dragging.current) { dragging.current = false; snap() }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%' }}>
+
+      {/* Cena */}
+      <div ref={sceneRef}
+           style={{ position: 'relative', height: 400, width: '100%', overflow: 'hidden',
+                    cursor: 'grab', userSelect: 'none' }}
+           onMouseDown={onMouseDown}
+           onMouseMove={onMouseMove}
+           onMouseUp={onMouseUp}
+           onMouseLeave={onMouseUp}
+           onTouchStart={onTouchStart}
+           onTouchMove={onTouchMove}
+           onTouchEnd={onTouchEnd}>
         {SLIDES.map(({ name, file }, i) => (
-          <div key={name} data-tela={i}
+          <div key={name} data-slide={i}
                style={{
-                 position: 'absolute',
-                 top: '50%', left: '50%',
-                 marginLeft: -(W / 2),
-                 marginTop:  -(H / 2),
-                 width: W, height: H,
-                 borderRadius: 8, overflow: 'hidden',
+                 position: 'absolute', top: '50%', left: '50%',
+                 marginLeft: -(W / 2), marginTop: -(H / 2),
+                 width: W, height: H, borderRadius: 10, overflow: 'hidden',
+                 border: '1px solid rgba(185,134,11,0.25)',
                  willChange: 'transform, opacity, filter',
                }}>
-            <img src={`/screenshots/${file}`} alt={name} loading="lazy"
-                 style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
+            <img src={`/screenshots/${file}`} alt={name} draggable={false}
+                 style={{ display: 'block', width: '100%', height: '100%',
+                          objectFit: 'cover', objectPosition: 'top', pointerEvents: 'none' }} />
           </div>
         ))}
       </div>
 
-      {/* Mobile: imagem flat */}
-      <div className="carousel-mobile-img">
-        <img src="/screenshots/dashboard.png" alt="Dashboard"
-             style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 8, objectFit: 'cover' }} />
+      {/* Dots */}
+      <div ref={dotsRef} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        {SLIDES.map((_, i) => (
+          <div key={i} data-dot={i}
+               onClick={() => { target.current = i }}
+               style={{
+                 width: 7, height: 7, borderRadius: '50%', cursor: 'pointer',
+                 background: i === 0 ? '#C9A028' : 'rgba(185,134,11,0.3)',
+                 transform: i === 0 ? 'scale(1.4)' : 'scale(1)',
+                 transition: 'background 200ms, transform 200ms',
+               }} />
+        ))}
       </div>
 
-      {/* Botão voltar */}
-      <button onClick={handleBack} className="carousel-back-btn">
-        ← voltar
-      </button>
+      {/* Hint */}
+      <span style={{ color: 'rgba(185,134,11,0.45)', fontSize: 11,
+                     fontFamily: 'var(--font-body)', letterSpacing: '0.3px' }}>
+        arraste para explorar
+      </span>
     </div>
   )
 }

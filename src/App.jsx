@@ -359,7 +359,10 @@ export default function App() {
       {/* ── GALERIA — O sistema por dentro ────────────────────── */}
       <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
-        <h2 className="reveal reveal-delay-1" style={{ ...HEADLINE, fontSize: '38px', margin: '0 0 40px' }}>
+        <h2 className="reveal reveal-delay-1" style={{
+          fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 400,
+          color: '#C9A028', margin: '0 0 40px', letterSpacing: '0.01em',
+        }}>
           O sistema por dentro
         </h2>
         <div className="reveal reveal-delay-2" style={{ width: '100%', maxWidth: 960 }}>

@@ -182,28 +182,7 @@ body {
   .pilar-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ── Carrossel galeria ──────────────────────────────────────── */
-.carousel-back-btn {
-  background: transparent;
-  border: 0.5px solid rgba(184,134,11,0.3);
-  color: #B8860B;
-  border-radius: 20px;
-  padding: 8px 20px;
-  font-size: 12px;
-  font-family: var(--font-body);
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: border-color 200ms;
-}
-.carousel-back-btn:hover { border-color: rgba(184,134,11,0.6); }
-
-.carousel-mobile-img { display: none; }
-
-@media (max-width: 768px) {
-  .carousel-scene    { display: none; }
-  .carousel-mobile-img { display: block; width: 100%; }
-  .carousel-back-btn { display: none; }
-}
+/* ── Carrossel galeria — mobile tratado via JS (window.innerWidth) ── */
 
 /* ── Governança — mobile: coluna vertical, setas ocultas ───── */
 @media (max-width: 600px) {
