@@ -4,8 +4,9 @@ const SLIDES = [
   { name: 'Patrimônio',   file: 'patrimonio.png' },
   { name: 'Dashboard',    file: 'dashboard.png' },
   { name: 'Fluxo',        file: 'Fluxo.png' },
+  { name: 'Cenários',     file: 'cenários.png' },
+  { name: 'José em ação', file: 'Chat.png' },
   { name: 'Metas',        file: 'metas.png' },
-  { name: 'José em ação', file: 'joseemacao.png' },
 ]
 const N        = SLIDES.length
 const JOSE_IDX = 4      // único slide com dimensões expandidas
