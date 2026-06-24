@@ -1,16 +1,17 @@
 import { useRef, useEffect } from 'react'
 
 const SLIDES = [
-  { name: 'Dashboard',   file: 'dashboard.png' },
-  { name: 'Fluxo',       file: 'Fluxo.png' },
-  { name: 'Metas',       file: 'metas.png' },
-  { name: 'Vencimentos', file: 'Vencimentos.png' },
+  { name: 'Patrimônio', file: 'patrimonio.png' },
+  { name: 'Dashboard',  file: 'dashboard.png' },
+  { name: 'Fluxo',      file: 'Fluxo.png' },
+  { name: 'Metas',      file: 'metas.png' },
 ]
 const N        = SLIDES.length
 const W        = 480
 const H        = 310
 const X_STEP   = 340
 const DRAG_DIV = 380
+const HOVER_V  = 0.012  // progresso por frame durante hover
 
 function lerp(a, b, t) { return a + (b - a) * t }
 
@@ -39,14 +40,16 @@ function cardStyle(offset, mobile) {
 }
 
 export default function CarouselGaleria() {
-  const sceneRef  = useRef(null)
-  const dotsRef   = useRef(null)
-  const progress  = useRef(0)
-  const target    = useRef(0)
-  const dragging  = useRef(false)
-  const dragX0    = useRef(0)
-  const dragProg0 = useRef(0)
-  const rafRef    = useRef(null)
+  const sceneRef    = useRef(null)
+  const dotsRef     = useRef(null)
+  const progress    = useRef(0)
+  const target      = useRef(0)
+  const dragging    = useRef(false)
+  const dragX0      = useRef(0)
+  const dragProg0   = useRef(0)
+  const hoverActive = useRef(false)
+  const hoverDir    = useRef(0)   // +1 direita | -1 esquerda
+  const rafRef      = useRef(null)
 
   function applyFrame(prog) {
     if (!sceneRef.current) return
@@ -67,6 +70,10 @@ export default function CarouselGaleria() {
 
   useEffect(() => {
     function frame() {
+      // auto-avanço por hover (ignorado durante drag)
+      if (hoverActive.current && !dragging.current) {
+        target.current = ((target.current + hoverDir.current * HOVER_V) % N + N) % N
+      }
       // shortest-path lerp com wrap circular
       let diff = target.current - progress.current
       diff = ((diff % N) + N) % N
@@ -83,20 +90,37 @@ export default function CarouselGaleria() {
     target.current = ((Math.round(target.current) % N) + N) % N
   }
 
+  // ── Mouse ──────────────────────────────────────────────────
   function onMouseDown(e) {
     dragging.current  = true
     dragX0.current    = e.clientX
     dragProg0.current = target.current
     e.preventDefault()
   }
+
   function onMouseMove(e) {
-    if (!dragging.current) return
-    target.current = dragProg0.current + (e.clientX - dragX0.current) / DRAG_DIV
+    if (dragging.current) {
+      target.current = dragProg0.current + (e.clientX - dragX0.current) / DRAG_DIV
+      return
+    }
+    // hover: detecta metade direita/esquerda
+    const rect = e.currentTarget.getBoundingClientRect()
+    hoverDir.current    = e.clientX - rect.left > rect.width / 2 ? 1 : -1
+    hoverActive.current = true
   }
+
   function onMouseUp() {
     if (dragging.current) { dragging.current = false; snap() }
   }
 
+  function onMouseLeave() {
+    if (dragging.current) { dragging.current = false; snap() }
+    hoverActive.current = false
+    hoverDir.current    = 0
+    snap()
+  }
+
+  // ── Touch ──────────────────────────────────────────────────
   function onTouchStart(e) {
     dragging.current  = true
     dragX0.current    = e.touches[0].clientX
@@ -121,7 +145,7 @@ export default function CarouselGaleria() {
            onMouseDown={onMouseDown}
            onMouseMove={onMouseMove}
            onMouseUp={onMouseUp}
-           onMouseLeave={onMouseUp}
+           onMouseLeave={onMouseLeave}
            onTouchStart={onTouchStart}
            onTouchMove={onTouchMove}
            onTouchEnd={onTouchEnd}>
@@ -158,7 +182,7 @@ export default function CarouselGaleria() {
       {/* Hint */}
       <span style={{ color: 'rgba(185,134,11,0.45)', fontSize: 11,
                      fontFamily: 'var(--font-body)', letterSpacing: '0.3px' }}>
-        arraste para explorar
+        passe o cursor ou arraste para explorar
       </span>
     </div>
   )
