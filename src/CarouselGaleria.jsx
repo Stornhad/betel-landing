@@ -1,21 +1,25 @@
 import { useRef, useEffect } from 'react'
 
 const SLIDES = [
-  { name: 'Patrimônio', file: 'patrimonio.png' },
-  { name: 'Dashboard',  file: 'dashboard.png' },
-  { name: 'Fluxo',      file: 'Fluxo.png' },
-  { name: 'Metas',      file: 'metas.png' },
+  { name: 'Patrimônio',   file: 'patrimonio.png' },
+  { name: 'Dashboard',    file: 'dashboard.png' },
+  { name: 'Fluxo',        file: 'Fluxo.png' },
+  { name: 'Metas',        file: 'metas.png' },
+  { name: 'José em ação', file: 'joseemacao.png' },
 ]
 const N        = SLIDES.length
-const W        = 480
-const H        = 310
+const JOSE_IDX = 4      // único slide com dimensões expandidas
+const W        = 480    // largura padrão
+const H        = 310    // altura padrão
+const W_JOSE   = 620    // largura expandida (José centralizado)
+const H_JOSE   = 400    // altura expandida
 const X_STEP   = 340
 const DRAG_DIV = 380
-const HOVER_V  = 0.012  // progresso por frame durante hover
+const HOVER_V  = 0.012
 
 function lerp(a, b, t) { return a + (b - a) * t }
 
-function cardStyle(offset, mobile) {
+function cardStyle(offset, mobile, isJose) {
   const abs = Math.abs(offset)
 
   if (mobile && abs > 0.7) return { opacity: '0', pointerEvents: 'none' }
@@ -29,6 +33,11 @@ function cardStyle(offset, mobile) {
   const shadow     = abs < 0.3 ? '0 8px 40px rgba(185,134,11,0.25)' : 'none'
   const prefix     = mobile ? '' : 'perspective(900px) '
 
+  // Dimensão dinâmica: José interpola de 620×400 (centro) para 480×310 (offset=1)
+  const t_size   = Math.min(abs, 1)
+  const cardW    = isJose ? Math.round(lerp(W_JOSE, W, t_size)) : W
+  const cardH    = isJose ? Math.round(lerp(H_JOSE, H, t_size)) : H
+
   return {
     transform:     `${prefix}translateX(${x}px) rotateY(${rotY}deg) scale(${scale})`,
     filter:        `brightness(${brightness})`,
@@ -36,6 +45,10 @@ function cardStyle(offset, mobile) {
     zIndex:        String(Math.round(10 - abs * 3)),
     boxShadow:     shadow,
     pointerEvents: abs < 1.5 ? 'auto' : 'none',
+    width:         `${cardW}px`,
+    height:        `${cardH}px`,
+    marginLeft:    `${-cardW / 2}px`,
+    marginTop:     `${-cardH / 2}px`,
   }
 }
 
@@ -48,7 +61,7 @@ export default function CarouselGaleria() {
   const dragX0      = useRef(0)
   const dragProg0   = useRef(0)
   const hoverActive = useRef(false)
-  const hoverDir    = useRef(0)   // +1 direita | -1 esquerda
+  const hoverDir    = useRef(0)
   const rafRef      = useRef(null)
 
   function applyFrame(prog) {
@@ -57,7 +70,7 @@ export default function CarouselGaleria() {
     sceneRef.current.querySelectorAll('[data-slide]').forEach((el, i) => {
       let off = ((i - prog) % N + N) % N
       if (off > N / 2) off -= N
-      Object.assign(el.style, cardStyle(off, mobile))
+      Object.assign(el.style, cardStyle(off, mobile, i === JOSE_IDX))
     })
     if (dotsRef.current) {
       const active = ((Math.round(prog) % N) + N) % N
@@ -70,11 +83,9 @@ export default function CarouselGaleria() {
 
   useEffect(() => {
     function frame() {
-      // auto-avanço por hover (ignorado durante drag)
       if (hoverActive.current && !dragging.current) {
         target.current = ((target.current + hoverDir.current * HOVER_V) % N + N) % N
       }
-      // shortest-path lerp com wrap circular
       let diff = target.current - progress.current
       diff = ((diff % N) + N) % N
       if (diff > N / 2) diff -= N
@@ -90,29 +101,24 @@ export default function CarouselGaleria() {
     target.current = ((Math.round(target.current) % N) + N) % N
   }
 
-  // ── Mouse ──────────────────────────────────────────────────
   function onMouseDown(e) {
     dragging.current  = true
     dragX0.current    = e.clientX
     dragProg0.current = target.current
     e.preventDefault()
   }
-
   function onMouseMove(e) {
     if (dragging.current) {
       target.current = dragProg0.current + (e.clientX - dragX0.current) / DRAG_DIV
       return
     }
-    // hover: detecta metade direita/esquerda
     const rect = e.currentTarget.getBoundingClientRect()
     hoverDir.current    = e.clientX - rect.left > rect.width / 2 ? 1 : -1
     hoverActive.current = true
   }
-
   function onMouseUp() {
     if (dragging.current) { dragging.current = false; snap() }
   }
-
   function onMouseLeave() {
     if (dragging.current) { dragging.current = false; snap() }
     hoverActive.current = false
@@ -120,7 +126,6 @@ export default function CarouselGaleria() {
     snap()
   }
 
-  // ── Touch ──────────────────────────────────────────────────
   function onTouchStart(e) {
     dragging.current  = true
     dragX0.current    = e.touches[0].clientX
@@ -138,9 +143,9 @@ export default function CarouselGaleria() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, width: '100%' }}>
 
-      {/* Cena */}
+      {/* Cena — altura extra para acomodar José 400px + sombra */}
       <div ref={sceneRef}
-           style={{ position: 'relative', height: 400, width: '100%', overflow: 'hidden',
+           style={{ position: 'relative', height: 460, width: '100%', overflow: 'hidden',
                     cursor: 'grab', userSelect: 'none' }}
            onMouseDown={onMouseDown}
            onMouseMove={onMouseMove}
@@ -154,18 +159,21 @@ export default function CarouselGaleria() {
                style={{
                  position: 'absolute', top: '50%', left: '50%',
                  marginLeft: -(W / 2), marginTop: -(H / 2),
-                 width: W, height: H, borderRadius: 10, overflow: 'hidden',
+                 width: W, height: H,
+                 borderRadius: 10, overflow: 'hidden',
+                 background: '#0A0A0A',
                  border: '1px solid rgba(185,134,11,0.25)',
-                 willChange: 'transform, opacity, filter',
+                 willChange: 'transform, opacity, filter, width, height',
                }}>
             <img src={`/screenshots/${file}`} alt={name} draggable={false}
                  style={{ display: 'block', width: '100%', height: '100%',
-                          objectFit: 'cover', objectPosition: 'top', pointerEvents: 'none' }} />
+                          objectFit: 'contain', objectPosition: 'center',
+                          pointerEvents: 'none' }} />
           </div>
         ))}
       </div>
 
-      {/* Dots */}
+      {/* Dots — 5 */}
       <div ref={dotsRef} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         {SLIDES.map((_, i) => (
           <div key={i} data-dot={i}
