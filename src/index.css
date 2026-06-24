@@ -182,10 +182,39 @@ body {
   .pilar-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ── Screenshots — grid responsivo ─────────────────────────── */
-.screenshot-grid { grid-template-columns: repeat(3, 1fr); }
+/* ── Galeria 3D — telas isométricas ────────────────────────── */
+.tela-fundo,
+.tela-meio,
+.tela-frente {
+  position: absolute;
+  width: 420px;
+  height: 270px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(184,134,11,0.15);
+}
+.tela-fundo  {
+  transform: perspective(900px) rotateY(-25deg) rotateX(6deg) translateX(-90px) translateY(35px) scale(0.80);
+  opacity: 0.55; filter: brightness(0.6); z-index: 1;
+}
+.tela-meio   {
+  transform: perspective(900px) rotateY(-20deg) rotateX(4deg) translateX(-20px) translateY(12px) scale(0.90);
+  opacity: 0.85; filter: brightness(0.85); z-index: 2;
+}
+.tela-frente {
+  transform: perspective(900px) rotateY(-15deg) rotateX(3deg) translateX(50px);
+  opacity: 1; z-index: 3;
+}
 @media (max-width: 700px) {
-  .screenshot-grid { grid-template-columns: 1fr; }
+  .tela-fundo  { display: none; }
+  .tela-meio   { display: none; }
+  .tela-frente {
+    transform: none;
+    position: relative;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 420 / 270;
+  }
 }
 
 /* ── Governança — mobile: coluna vertical, setas ocultas ───── */
