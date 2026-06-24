@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 // Code-split: Three.js carrega assíncrono, fora do bundle inicial
 const ThreeBackground = lazy(() => import('./ThreeBackground'))
+import CarouselGaleria from './CarouselGaleria'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -358,29 +359,13 @@ export default function App() {
       {/* ── GALERIA — O sistema por dentro ────────────────────── */}
       <section data-pin className="scene" style={sectionBase}>
         <SectionDivider className="reveal" />
-        <h2 className="reveal reveal-delay-1" style={{ ...HEADLINE, fontSize: '38px', margin: '0 0 48px' }}>
+        <h2 className="reveal reveal-delay-1" style={{ ...HEADLINE, fontSize: '38px', margin: '0 0 40px' }}>
           O sistema por dentro
         </h2>
-
-        <div className="reveal reveal-delay-2" style={{ position: 'relative', height: 380, width: '100%', maxWidth: 700 }}>
-          {/* Tela fundo — Vencimentos */}
-          <div className="tela-fundo">
-            <img src="/screenshots/Vencimentos.png" alt="Vencimentos" loading="lazy"
-              style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
-          </div>
-          {/* Tela meio — Fluxo */}
-          <div className="tela-meio">
-            <img src="/screenshots/Fluxo.png" alt="Fluxo" loading="lazy"
-              style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
-          </div>
-          {/* Tela frente — Dashboard */}
-          <div className="tela-frente">
-            <img src="/screenshots/dashboard.png" alt="Dashboard" loading="lazy"
-              style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
-          </div>
+        <div className="reveal reveal-delay-2" style={{ width: '100%', maxWidth: 960 }}>
+          <CarouselGaleria />
         </div>
-
-        <SectionDivider className="reveal reveal-delay-3" style={{ marginTop: 48 }} />
+        <SectionDivider className="reveal reveal-delay-3" style={{ marginTop: 40 }} />
       </section>
 
       {/* ── 5: OS AGENTES ──────────────────────────────────────── */}
