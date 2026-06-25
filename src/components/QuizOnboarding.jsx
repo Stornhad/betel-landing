@@ -112,7 +112,9 @@ export default function QuizOnboarding() {
   function getFinalFrags() {
     return QUESTIONS.map((q, i) => {
       const custom = customs[i].trim()
-      return custom !== '' ? custom : q.opts[selections[i]].frag
+      if (custom !== '') return custom
+      const sel = selections[i]
+      return (sel !== null && sel !== undefined) ? q.opts[sel].frag : ''
     })
   }
 
@@ -121,19 +123,24 @@ export default function QuizOnboarding() {
   }
 
   async function generatePrompt() {
-    const frags = getFinalFrags()
-
-    if (!hasAnyCustom()) {
-      const p = buildTemplate(frags)
-      localStorage.setItem('betel_onboarding_prompt', p)
-      setPrompt(p)
-      setStep(4)
-      return
-    }
-
     setLoading(true)
     setError(null)
     try {
+      const frags = getFinalFrags()
+
+      // Garante que todas as 4 respostas são strings não-vazias antes de montar o prompt
+      if (frags.some(f => !f || !f.trim())) {
+        throw new Error('Preencha todas as perguntas antes de continuar.')
+      }
+
+      if (!hasAnyCustom()) {
+        const p = buildTemplate(frags)
+        localStorage.setItem('betel_onboarding_prompt', p)
+        setPrompt(p)
+        setStep(4)
+        return
+      }
+
       const res  = await fetch('/api/quiz', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,11 +148,12 @@ export default function QuizOnboarding() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erro desconhecido')
+      if (!data.prompt) throw new Error('Resposta vazia do servidor.')
       localStorage.setItem('betel_onboarding_prompt', data.prompt)
       setPrompt(data.prompt)
       setStep(4)
-    } catch {
-      setError('Não foi possível gerar seu ponto de partida. Tente novamente.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Não foi possível gerar seu resultado. Tente novamente.')
     } finally {
       setLoading(false)
     }
