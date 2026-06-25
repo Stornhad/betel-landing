@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // Code-split: Three.js carrega assíncrono, fora do bundle inicial
 const ThreeBackground = lazy(() => import('./ThreeBackground'))
 import CarouselGaleria from './CarouselGaleria'
+import QuizOnboarding from './components/QuizOnboarding'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -413,6 +414,36 @@ export default function App() {
         <p className="reveal reveal-delay-3" style={{ fontWeight: 400, fontSize: '16px', color: 'var(--text-muted)', maxWidth: 480, margin: 0 }}>
           O BETEL roda na sua infraestrutura, com suas credenciais, sob suas regras.
         </p>
+      </section>
+
+      {/* ── QUIZ ONBOARDING ────────────────────────────────────── */}
+      <section style={{
+        position: 'relative', zIndex: 1,
+        padding: '100px 60px',
+        background: '#0A0A0A',
+        borderTop: '0.5px solid rgba(184,134,11,0.12)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <p style={{
+            fontWeight: 600, fontSize: '11px', textTransform: 'uppercase',
+            letterSpacing: '3px', color: 'var(--gold-primary)', margin: '0 0 16px',
+          }}>
+            Diagnóstico gratuito
+          </p>
+          <h2 style={{
+            fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: '42px',
+            color: 'var(--text-primary)', margin: '0 0 16px', lineHeight: 1.15,
+          }}>
+            Onde você está hoje?
+          </h2>
+          <p style={{
+            fontWeight: 400, fontSize: '15px', color: 'var(--text-muted)',
+            maxWidth: 440, margin: '0 auto',
+          }}>
+            Quatro perguntas. Dois minutos. Um ponto de partida gerado para a sua primeira conversa com o JOSÉ.
+          </p>
+        </div>
+        <QuizOnboarding />
       </section>
 
       {/* ── FOOTER (scroll normal) ─────────────────────────────── */}
